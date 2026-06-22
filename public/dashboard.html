@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>⚡ auraFuel · Dashboard</title>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --surface: #fafafa;
+            --border: #e5e5e5;
+            --text-primary: #1a1a1a;
+            --text-secondary: #8c8c8c;
+            --text-tertiary: #b0b0b0;
+            --cta: #000000;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+            --shadow-md: 0 6px 16px rgba(0,0,0,0.08);
+            --shadow-lg: 0 12px 28px rgba(0,0,0,0.12);
+            --radius-sm: 12px;
+            --radius-md: 16px;
+            --radius-lg: 20px;
+            --radius-xl: 24px;
+            --radius-full: 999px;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: #f5f5f5;
+            color: var(--text-primary);
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; padding: 16px;
+            -webkit-font-smoothing: antialiased;
+        }
+        .app-shell {
+            width: 100%; max-width: 420px; height: 720px;
+            background: var(--bg); border-radius: var(--radius-xl);
+            overflow: hidden; box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border); display: flex; flex-direction: column; position: relative;
+        }
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 18px 20px 14px 20px; position: relative; z-index: 100;
+        }
+        .header-left { display: flex; align-items: center; gap: 10px; }
+        .avatar-circle {
+            width: 42px; height: 42px; border-radius: 50%; background: var(--cta);
+            color: #fff; display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 18px; cursor: pointer;
+        }
+        .greeting-text .greeting {
+            font-size: 12px; color: var(--text-secondary); font-weight: 500;
+            text-transform: uppercase; letter-spacing: 0.6px;
+        }
+        .greeting-text .name {
+            font-size: 17px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.3px;
+        }
+        .header-icons { display: flex; gap: 12px; }
+        .icon-circle {
+            width: 38px; height: 38px; border-radius: 50%; background: var(--surface);
+            border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 16px; position: relative;
+        }
+        .badge-dot {
+            width: 8px; height: 8px; border-radius: 50%; background: #ef4444;
+            position: absolute; top: 6px; right: 6px;
+        }
+        .dropdown-menu {
+            position: absolute; top: 70px; left: 20px; background: var(--bg);
+            border: 1px solid var(--border); border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md); min-width: 180px; z-index: 1000;
+            display: none; flex-direction: column; overflow: hidden;
+        }
+        .dropdown-menu.show { display: flex; }
+        .dropdown-item {
+            padding: 12px 16px; font-size: 13px; font-weight: 500; color: var(--text-primary);
+            cursor: pointer; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px;
+        }
+        .dropdown-item:last-child { border-bottom: none; color: var(--error); }
+        .dropdown-item:hover { background: var(--surface); }
+
+        .main-content { flex: 1; overflow-y: auto; padding: 0 20px 10px 20px; }
+
+        .calorie-card {
+            background: var(--surface); border-radius: var(--radius-lg); padding: 20px;
+            border: 1px solid var(--border); margin-bottom: 16px;
+        }
+        .calorie-header {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;
+        }
+        .calorie-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.8px; }
+        .calorie-goal { font-size: 12px; color: var(--text-tertiary); font-weight: 500; }
+        .calorie-row { display: flex; align-items: center; gap: 16px; }
+        .progress-ring-wrap { position: relative; width: 80px; height: 80px; flex-shrink: 0; }
+        .progress-ring {
+            width: 80px; height: 80px; border-radius: 50%;
+            background: conic-gradient(var(--cta) 0deg, #e5e5e5 0deg);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .ring-center {
+            width: 60px; height: 60px; border-radius: 50%; background: var(--surface);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .ring-percent { font-size: 16px; font-weight: 700; color: var(--text-primary); }
+        .ring-label-sm { font-size: 9px; color: var(--text-tertiary); font-weight: 500; }
+        .calorie-info { flex: 1; }
+        .calorie-consumed { font-size: 32px; font-weight: 300; color: var(--text-primary); letter-spacing: -1px; line-height: 1; }
+        .calorie-unit { font-size: 14px; color: var(--text-secondary); font-weight: 500; }
+        .calorie-remaining { font-size: 13px; color: var(--text-tertiary); margin-top: 4px; font-weight: 500; }
+
+        .checklist { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+        .checklist-item {
+            display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius-md); cursor: pointer; transition: opacity 0.2s;
+        }
+        .checklist-item.checked { border-color: var(--success); background: #f5fff9; }
+        .checklist-item.disabled { opacity: 0.5; pointer-events: none; cursor: not-allowed; }
+        .check-emoji { font-size: 20px; width: 24px; text-align: center; }
+        .check-info { flex: 1; }
+        .check-name { font-size: 14px; font-weight: 600; }
+        .check-cal { font-size: 11px; color: var(--text-secondary); }
+        .check-box {
+            width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--border);
+            display: flex; align-items: center; justify-content: center; font-size: 14px;
+        }
+        .checklist-item.checked .check-box { background: var(--success); border-color: var(--success); color: #fff; }
+
+        .section-title { font-size: 14px; font-weight: 700; margin-bottom: 10px; }
+
+        .mini-card-row { display: flex; gap: 10px; margin-bottom: 16px; }
+        .mini-card {
+            flex: 1; background: var(--surface); border-radius: var(--radius-md);
+            padding: 14px; border: 1px solid var(--border); cursor: pointer;
+        }
+        .mini-card-icon { font-size: 22px; margin-bottom: 6px; }
+        .mini-card-value { font-size: 20px; font-weight: 700; }
+        .mini-card-label { font-size: 11px; color: var(--text-secondary); font-weight: 500; }
+
+        .setup-banner {
+            background: var(--warning); color: #1a1a1a; padding: 12px 16px; border-radius: var(--radius-md);
+            margin-bottom: 16px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px;
+            cursor: pointer;
+        }
+
+        .bottom-nav {
+            display: flex; justify-content: space-around; align-items: center;
+            padding: 8px 16px 14px 16px; border-top: 1px solid var(--border); background: var(--bg);
+        }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; gap: 3px;
+            cursor: pointer; color: var(--text-tertiary); font-size: 10px; font-weight: 500;
+            text-decoration: none;
+        }
+        .nav-item.active { color: var(--text-primary); font-weight: 600; }
+        .nav-icon { font-size: 20px; }
+
+        .toast {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background: var(--success); color: #fff; padding: 10px 22px; border-radius: var(--radius-full);
+            font-size: 13px; font-weight: 600; z-index: 1000; opacity: 0; pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .toast.show { opacity: 1; }
+        .toast.warning { background: var(--warning); color: #1a1a1a; }
+        .toast.error { background: var(--error); }
+
+        @media (max-width: 380px) {
+            .calorie-card { padding: 16px; }
+            .calorie-consumed { font-size: 26px; }
+        }
+    </style>
+</head>
+<body>
+<div class="app-shell">
+    <header class="header">
+        <div class="header-left">
+            <div class="avatar-circle" id="avatarLetter">P</div>
+            <div class="greeting-text">
+                <div class="greeting" id="greetingTime">Good Morning</div>
+                <div class="name" id="userNameDisplay">Priya</div>
+            </div>
+        </div>
+        <div class="header-icons">
+            <div class="icon-circle" id="notificationBtn">🔔<span class="badge-dot"></span></div>
+        </div>
+        <div class="dropdown-menu" id="dropdownMenu">
+            <div class="dropdown-item" id="dropdownViewDiet">📋 View Diet Plan</div>
+            <div class="dropdown-item" id="dropdownViewSplit">🏋️ View Workout Split</div>
+            <div class="dropdown-item" id="dropdownLogout">🚪 Logout</div>
+        </div>
+    </header>
+
+    <div class="main-content">
+        <div class="setup-banner" id="setupBanner" style="display:none;">
+            ⚠️ Please create your diet plan & workout split to start tracking.
+        </div>
+
+        <div class="calorie-card">
+            <div class="calorie-header">
+                <span class="calorie-label">🔥 Calories Today</span>
+                <span class="calorie-goal">Goal: <strong id="dailyGoalDisplay">—</strong> kcal</span>
+            </div>
+            <div class="calorie-row">
+                <div class="progress-ring-wrap">
+                    <div class="progress-ring" id="calorieRing">
+                        <div class="ring-center">
+                            <span class="ring-percent" id="ringPercent">0%</span>
+                            <span class="ring-label-sm">done</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="calorie-info">
+                    <span class="calorie-consumed" id="consumedCal">0</span>
+                    <span class="calorie-unit"> / <span id="goalCal">—</span> kcal</span>
+                    <div class="calorie-remaining" id="remainingCal">—</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">🍴 Today's Meals</div>
+        <div class="checklist" id="mealChecklist"></div>
+
+        <div class="checklist-item" id="exerciseCheck">
+            <div class="check-emoji">🏋️</div>
+            <div class="check-info">
+                <div class="check-name">Exercise</div>
+                <div class="check-cal">Workout completed</div>
+            </div>
+            <div class="check-box" id="exerciseCheckBox">✓</div>
+        </div>
+
+        <div class="mini-card-row" style="margin-top:16px;">
+            <div class="mini-card" id="waterMiniCard">
+                <div class="mini-card-icon">💧</div>
+                <div class="mini-card-value"><span id="waterCount">0</span>/8</div>
+                <div class="mini-card-label">Water Glasses</div>
+            </div>
+            <div class="mini-card" id="weightMiniCard">
+                <div class="mini-card-icon">⚖️</div>
+                <div class="mini-card-value" id="weightValue">—</div>
+                <div class="mini-card-label">Weight (kg)</div>
+            </div>
+            <div class="mini-card" id="streakMiniCard">
+                <div class="mini-card-icon">🔥</div>
+                <div class="mini-card-value" id="streakCount">0</div>
+                <div class="mini-card-label">Day Streak</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <a href="dashboard.html" class="nav-item active"><span class="nav-icon">🏠</span><span>Home</span></a>
+        <a href="progress.html" class="nav-item"><span class="nav-icon">📊</span><span>Progress</span></a>
+        <a href="profile.html" class="nav-item"><span class="nav-icon">👤</span><span>Profile</span></a>
+    </div>
+</div>
+
+<div class="toast" id="toast">✅ Updated!</div>
+
+<script>
+(function() {
+    const currentUser = JSON.parse(localStorage.getItem('aurafuel_currentUser') || sessionStorage.getItem('aurafuel_currentUser'));
+    if (!currentUser) { window.location.href = 'login.html'; return; }
+    const token = localStorage.getItem('aurafuel_token') || sessionStorage.getItem('aurafuel_token');
+    const today = new Date().toISOString().split('T')[0];
+
+    // DOM
+    const avatarLetter = document.getElementById('avatarLetter');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+    const greetingTime = document.getElementById('greetingTime');
+    const userNameDisplay = document.getElementById('userNameDisplay');
+    const dailyGoalDisplay = document.getElementById('dailyGoalDisplay');
+    const goalCalSpan = document.getElementById('goalCal');
+    const consumedCal = document.getElementById('consumedCal');
+    const remainingCal = document.getElementById('remainingCal');
+    const calorieRing = document.getElementById('calorieRing');
+    const ringPercent = document.getElementById('ringPercent');
+    const mealChecklist = document.getElementById('mealChecklist');
+    const exerciseCheck = document.getElementById('exerciseCheck');
+    const exerciseCheckBox = document.getElementById('exerciseCheckBox');
+    const waterCount = document.getElementById('waterCount');
+    const weightValue = document.getElementById('weightValue');
+    const streakCount = document.getElementById('streakCount');
+    const toast = document.getElementById('toast');
+    const setupBanner = document.getElementById('setupBanner');
+
+    // User info
+    const firstName = currentUser.fullName?.split(' ')[0] || 'User';
+    avatarLetter.textContent = firstName.charAt(0).toUpperCase();
+    userNameDisplay.textContent = firstName;
+    const hour = new Date().getHours();
+    if (hour < 12) greetingTime.textContent = 'Good Morning ☀️';
+    else if (hour < 17) greetingTime.textContent = 'Good Afternoon 🌤️';
+    else greetingTime.textContent = 'Good Evening 🌙';
+
+    let goal = currentUser.goal || 'maintenance';
+    let gender = currentUser.gender || 'female';
+    let age = currentUser.age || 25;
+    let weight = currentUser.weight || 75;
+    const height = 165;
+
+    const mealNames = ['breakfast', 'lunch', 'pre_workout', 'post_workout', 'dinner'];
+    const mealIcons = { breakfast: '🌅', lunch: '🌇', pre_workout: '⚡', post_workout: '🔄', dinner: '🌙' };
+    const mealWindows = {
+        breakfast: { start: 7, end: 9, name: 'Breakfast' },
+        lunch: { start: 12, end: 14, name: 'Lunch' },
+        pre_workout: { start: 15, end: 17, name: 'Pre-Workout' },
+        post_workout: { start: 17, end: 19, name: 'Post-Workout' },
+        dinner: { start: 19, end: 21, name: 'Dinner' }
+    };
+    const motivationalMessages = {
+        checked: ['✅ Great job! You\'re on track! 💪', '🌟 Awesome! Every meal brings you closer!'],
+        missed: ['⚠️ You missed %meal%. Don\'t let it happen again!', '😟 %meal% skipped. Stay focused!'],
+        reminder: ['⏰ Time for %meal%!', '🔔 %meal% time!'],
+        allDone: ['🎉 All meals done! You\'re a rockstar! 🚀'],
+        exerciseDone: ['🏋️ Workout crushed! Your aura is glowing! ✨']
+    };
+
+    let mealTargets = {};
+    mealNames.forEach(m => mealTargets[m] = 0);
+    let dailyTarget = 0;
+    let trackerEnabled = false;
+    let reminderInterval = null;
+    let waterReminderInterval = null;
+    let lastReminderSent = {};
+    mealNames.forEach(m => lastReminderSent[m] = 0);
+
+    // ─── API helpers ───
+    async function fetchMealChecks() {
+        const res = await fetch(`http://localhost:5000/api/tracker/meal/${today}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        return data.meals || [];
+    }
+    async function toggleMealAPI(meal) {
+        const res = await fetch('http://localhost:5000/api/tracker/meal', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ date: today, mealType: meal })
+        });
+        return await res.json();
+    }
+    async function fetchExerciseCheck() {
+        const res = await fetch(`http://localhost:5000/api/tracker/exercise/${today}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        return data.checked;
+    }
+    async function toggleExerciseAPI() {
+        const res = await fetch('http://localhost:5000/api/tracker/exercise', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ date: today })
+        });
+        return await res.json();
+    }
+    async function fetchWaterGlasses() {
+        const res = await fetch(`http://localhost:5000/api/tracker/water/today`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        return data.glasses || 0;
+    }
+    async function addWaterGlass() {
+        await fetch('http://localhost:5000/api/water', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ date: today })
+        });
+    }
+    async function fetchStreak() {
+        const res = await fetch('http://localhost:5000/api/tracker/streak', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        return data.streak || 0;
+    }
+
+    // ─── Setup check ───
+    async function checkUserSetup() {
+        try {
+            const [mealRes, exerciseRes] = await Promise.all([
+                fetch(`http://localhost:5000/api/meals/today`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch(`http://localhost:5000/api/exercise/latest`, { headers: { 'Authorization': `Bearer ${token}` } })
+            ]);
+            const mealData = await mealRes.json();
+            const exerciseData = await exerciseRes.json();
+            const meals = mealData.meals || [];
+            const hasMeals = meals.length === 5;
+            const hasExercise = exerciseData.exercise ? true : false;
+            trackerEnabled = hasMeals && hasExercise;
+            if (!trackerEnabled) {
+                showSetupBanner();
+            } else {
+                setupBanner.style.display = 'none';
+                enableChecklist();
+            }
+        } catch (err) { console.error(err); trackerEnabled = false; showSetupBanner(); }
+    }
+
+    function showSetupBanner() {
+        setupBanner.style.display = 'flex';
+        setupBanner.onclick = () => window.location.href = 'onboarding.html';
+        disableChecklist();
+        showToast('⚠️ Please create your diet plan & workout split first!', 'warning');
+    }
+
+    function disableChecklist() {
+        document.querySelectorAll('#mealChecklist .checklist-item, #exerciseCheck').forEach(el => el.classList.add('disabled'));
+    }
+
+    function enableChecklist() {
+        document.querySelectorAll('#mealChecklist .checklist-item, #exerciseCheck').forEach(el => el.classList.remove('disabled'));
+    }
+
+    // ─── Meal targets load (actual calories) ───
+    async function loadMealTargets() {
+        try {
+            const res = await fetch(`http://localhost:5000/api/meals/today`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            const todayMeals = data.meals || [];
+            todayMeals.forEach(meal => {
+                if (mealTargets.hasOwnProperty(meal.mealType)) {
+                    mealTargets[meal.mealType] = meal.totalCalories || 0;
+                }
+            });
+        } catch (err) {}
+        dailyTarget = Object.values(mealTargets).reduce((a,b) => a+b, 0);
+        if (dailyTarget === 0) {
+            let bmr;
+            if (gender === 'male') bmr = Math.round(10*weight + 6.25*height - 5*age + 5);
+            else bmr = Math.round(10*weight + 6.25*height - 5*age - 161);
+            if (goal === 'weight_loss') dailyTarget = bmr - 500;
+            else if (goal === 'muscle_gain') dailyTarget = bmr + 500;
+            else dailyTarget = bmr;
+        }
+        dailyGoalDisplay.textContent = dailyTarget.toLocaleString();
+        goalCalSpan.textContent = dailyTarget.toLocaleString();
+    }
+
+    // ─── UI updates ───
+    async function updateProgress() {
+        if (!trackerEnabled) return;
+        const meals = await fetchMealChecks();
+        let consumed = 0;
+        meals.forEach(meal => { consumed += (mealTargets[meal] || 0); });
+        const percent = dailyTarget > 0 ? Math.min(Math.round((consumed / dailyTarget)*100), 100) : 0;
+        consumedCal.textContent = consumed;
+        remainingCal.textContent = Math.max(dailyTarget - consumed, 0).toLocaleString() + ' kcal remaining';
+        ringPercent.textContent = percent + '%';
+        const deg = (percent/100)*360;
+        calorieRing.style.background = `conic-gradient(#1a1a1a ${deg}deg, #e5e5e5 ${deg}deg)`;
+    }
+
+    async function renderChecklist() {
+        const meals = trackerEnabled ? await fetchMealChecks() : [];
+        mealChecklist.innerHTML = '';
+        mealNames.forEach(meal => {
+            const isChecked = meals.includes(meal);
+            const targetCal = mealTargets[meal] || 0;
+            const div = document.createElement('div');
+            div.className = 'checklist-item' + (isChecked ? ' checked' : '') + (trackerEnabled ? '' : ' disabled');
+            div.innerHTML = `
+                <div class="check-emoji">${mealIcons[meal]}</div>
+                <div class="check-info">
+                    <div class="check-name">${meal.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())}</div>
+                    <div class="check-cal">~${targetCal} kcal</div>
+                </div>
+                <div class="check-box">${isChecked ? '✓' : ''}</div>
+            `;
+            if (trackerEnabled) {
+                div.addEventListener('click', () => toggleMeal(meal));
+            } else {
+                div.addEventListener('click', () => showToast('⚠️ Complete your diet plan first!', 'warning'));
+            }
+            mealChecklist.appendChild(div);
+        });
+
+        const exChecked = trackerEnabled ? await fetchExerciseCheck() : false;
+        exerciseCheck.classList.toggle('checked', exChecked);
+        exerciseCheckBox.textContent = exChecked ? '✓' : '';
+        if (!trackerEnabled) {
+            exerciseCheck.classList.add('disabled');
+        } else {
+            exerciseCheck.classList.remove('disabled');
+        }
+    }
+
+    async function toggleMeal(meal) {
+        if (!trackerEnabled) return;
+        const result = await toggleMealAPI(meal);
+        if (result.checked) {
+            const msg = motivationalMessages.checked[Math.floor(Math.random() * motivationalMessages.checked.length)];
+            showToast(msg, 'success');
+            if ('Notification' in window && Notification.permission === 'granted') {
+                try { new Notification('✅ Meal Complete!', { body: msg, icon: '⚡' }); } catch(e) {}
+            }
+        } else {
+            showToast(`ℹ️ ${meal.replace('_', ' ')} unchecked`, 'warning');
+        }
+        await renderChecklist();
+        await updateProgress();
+        await checkAllDone();
+    }
+
+    exerciseCheck.addEventListener('click', async () => {
+        if (!trackerEnabled) return;
+        const result = await toggleExerciseAPI();
+        const exChecked = result.checked;
+        exerciseCheck.classList.toggle('checked', exChecked);
+        exerciseCheckBox.textContent = exChecked ? '✓' : '';
+        if (exChecked) {
+            const msg = motivationalMessages.exerciseDone[Math.floor(Math.random() * motivationalMessages.exerciseDone.length)];
+            showToast(msg, 'success');
+            if ('Notification' in window && Notification.permission === 'granted') {
+                try { new Notification('🏋️ Exercise Done!', { body: msg, icon: '⚡' }); } catch(e) {}
+            }
+        }
+        await checkAllDone();
+    });
+
+    async function checkAllDone() {
+        const meals = await fetchMealChecks();
+        const exChecked = await fetchExerciseCheck();
+        if (meals.length === mealNames.length && exChecked) {
+            const msg = motivationalMessages.allDone[Math.floor(Math.random() * motivationalMessages.allDone.length)];
+            showToast(msg, 'success');
+            if ('Notification' in window && Notification.permission === 'granted') {
+                try { new Notification('🎉 Mission Complete!', { body: msg, icon: '⚡' }); } catch(e) {}
+            }
+        }
+    }
+
+    // ─── Water ───
+    async function updateWater() {
+        const glasses = await fetchWaterGlasses();
+        waterCount.textContent = glasses;
+    }
+
+    document.getElementById('waterMiniCard').addEventListener('click', async () => {
+        await addWaterGlass();
+        await updateWater();
+        showToast('💧 +1 Water Glass!');
+        checkWaterReminder();
+    });
+
+    // ─── Weight ───
+    function updateWeight() {
+        weightValue.textContent = weight;
+    }
+    document.getElementById('weightMiniCard').addEventListener('click', () => {
+        const newWeight = prompt('Enter current weight (kg):', weight);
+        if (newWeight && !isNaN(newWeight) && newWeight > 20 && newWeight < 300) {
+            currentUser.weight = parseFloat(newWeight);
+            localStorage.setItem('aurafuel_currentUser', JSON.stringify(currentUser));
+            weight = parseFloat(newWeight);
+            updateWeight();
+        }
+    });
+
+    // ─── Streak ───
+    async function updateStreak() {
+        const streak = await fetchStreak();
+        streakCount.textContent = streak;
+    }
+
+    // ─── Reminders ───
+    function getCurrentMealWindow() {
+        const now = new Date();
+        const currentHour = now.getHours();
+        for (const meal of mealNames) {
+            const win = mealWindows[meal];
+            if (currentHour >= win.start && currentHour < win.end) return meal;
+        }
+        return null;
+    }
+
+    function getNextUpcomingMeal() {
+        const now = new Date();
+        const currentHour = now.getHours();
+        for (const meal of mealNames) {
+            const win = mealWindows[meal];
+            if (currentHour < win.start) return meal;
+        }
+        return null;
+    }
+
+    async function runReminderCheck() {
+        const currentMeal = getCurrentMealWindow();
+        const checked = trackerEnabled ? await fetchMealChecks() : [];
+        const nowHour = new Date().getHours();
+
+        if (currentMeal && !checked.includes(currentMeal)) {
+            const now = Date.now();
+            if (now - (lastReminderSent[currentMeal] || 0) >= 540000) {
+                lastReminderSent[currentMeal] = now;
+                const msg = motivationalMessages.reminder[Math.floor(Math.random() * motivationalMessages.reminder.length)]
+                    .replace('%meal%', mealWindows[currentMeal].name);
+                showToast(msg, 'warning');
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    try { new Notification('⏰ Meal Reminder', { body: msg, icon: '⚡' }); } catch(e) {}
+                }
+            }
+        }
+
+        for (const meal of mealNames) {
+            const win = mealWindows[meal];
+            if (nowHour >= win.end && !checked.includes(meal)) {
+                const now = Date.now();
+                if (now - (lastReminderSent[meal] || 0) >= 540000) {
+                    lastReminderSent[meal] = now;
+                    const msg = motivationalMessages.missed[Math.floor(Math.random() * motivationalMessages.missed.length)]
+                        .replace('%meal%', win.name);
+                    showToast(msg, 'error');
+                    if ('Notification' in window && Notification.permission === 'granted') {
+                        try { new Notification('❌ Meal Missed', { body: msg, icon: '⚡' }); } catch(e) {}
+                    }
+                    const nextMeal = getNextUpcomingMeal();
+                    if (nextMeal) {
+                        setTimeout(() => {
+                            showToast(`🔔 Don't miss ${mealWindows[nextMeal].name}!`, 'warning');
+                        }, 2000);
+                    }
+                }
+            }
+        }
+    }
+
+    function startMealReminderSystem() {
+        if (reminderInterval) clearInterval(reminderInterval);
+        reminderInterval = setInterval(runReminderCheck, 300000);
+        setTimeout(runReminderCheck, 10000);
+    }
+
+    async function sendWaterReminder() {
+        const glasses = await fetchWaterGlasses();
+        if (glasses < 8) {
+            const remaining = 8 - glasses;
+            const msg = `💧 Time to drink water! You've had ${glasses}/8 glasses. ${remaining} more to go.`;
+            showToast(msg, 'warning');
+            if ('Notification' in window && Notification.permission === 'granted') {
+                try { new Notification('💧 Stay Hydrated!', { body: msg, icon: '⚡' }); } catch(e) {}
+            }
+        } else {
+            if (waterReminderInterval) { clearInterval(waterReminderInterval); waterReminderInterval = null; }
+        }
+    }
+
+    function checkWaterReminder() {
+        sendWaterReminder();
+        if (waterReminderInterval === null) {
+            fetchWaterGlasses().then(glasses => {
+                if (glasses < 8 && waterReminderInterval === null) {
+                    waterReminderInterval = setInterval(sendWaterReminder, 3600000);
+                }
+            });
+        }
+    }
+
+    function startWaterReminder() {
+        if (waterReminderInterval) clearInterval(waterReminderInterval);
+        sendWaterReminder();
+        waterReminderInterval = setInterval(sendWaterReminder, 3600000);
+    }
+
+    // ─── Toast ───
+    function showToast(msg, type = 'success') {
+        toast.textContent = msg;
+        toast.className = 'toast';
+        if (type === 'warning') toast.classList.add('warning');
+        if (type === 'error') toast.classList.add('error');
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // ─── Dropdown ───
+    avatarLetter.addEventListener('click', (e) => { e.stopPropagation(); dropdownMenu.classList.toggle('show'); });
+    document.addEventListener('click', () => dropdownMenu.classList.remove('show'));
+    document.getElementById('dropdownViewDiet').addEventListener('click', () => window.location.href = 'onboarding.html');
+    document.getElementById('dropdownViewSplit').addEventListener('click', () => window.location.href = 'exercise-plan.html');
+    document.getElementById('dropdownLogout').addEventListener('click', () => {
+        if (confirm('Logout?')) { localStorage.removeItem('aurafuel_currentUser'); sessionStorage.removeItem('aurafuel_currentUser'); window.location.href = 'login.html'; }
+    });
+
+    window.addEventListener('beforeunload', () => {
+        if (reminderInterval) clearInterval(reminderInterval);
+        if (waterReminderInterval) clearInterval(waterReminderInterval);
+    });
+
+    // ─── Initial load ───
+    (async () => {
+        await loadMealTargets();
+        await checkUserSetup();
+        await renderChecklist();
+        await updateProgress();
+        await updateWater();
+        updateWeight();
+        await updateStreak();
+        startMealReminderSystem();
+        startWaterReminder();
+    })();
+})();
+</script>
+</body>
+</html>

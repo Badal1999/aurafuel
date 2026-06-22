@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>⚡ auraFuel · Fuel Your Aura</title>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --surface: #fafafa;
+            --border: #e5e5e5;
+            --text-primary: #1a1a1a;
+            --text-secondary: #8c8c8c;
+            --text-tertiary: #b0b0b0;
+            --accent: #2d2d2d;
+            --cta: #000000;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.12);
+            --radius-sm: 12px;
+            --radius-md: 16px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+            --radius-full: 999px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: #f5f5f5;
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 16px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* ───── App Shell ───── */
+        .app-shell {
+            width: 100%;
+            max-width: 420px;
+            min-height: 680px;
+            background: var(--bg);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* ══════════ HEADER ══════════ */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 20px 16px 20px;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.3s ease;
+        }
+        .header.scrolled {
+            border-bottom: 1px solid var(--border);
+        }
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .logo-icon {
+            font-size: 26px;
+            color: var(--cta);
+            filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.2));
+            animation: boltPulse 2.5s ease-in-out infinite;
+            display: inline-block;
+        }
+        @keyframes boltPulse {
+            0%,
+            100% {
+                transform: scale(1) rotate(-5deg);
+            }
+            50% {
+                transform: scale(1.12) rotate(-2deg);
+            }
+        }
+        .logo-text {
+            font-size: 19px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.4px;
+            line-height: 1;
+        }
+        .logo-text .thin {
+            font-weight: 300;
+            color: var(--text-secondary);
+        }
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .btn-ghost {
+            padding: 8px 16px;
+            border-radius: var(--radius-full);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-ghost:hover {
+            background: var(--cta);
+            color: #fff;
+            border-color: var(--cta);
+        }
+        .btn-filled {
+            padding: 8px 18px;
+            border-radius: var(--radius-full);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            background: var(--cta);
+            color: #fff;
+            border: 1px solid var(--cta);
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-filled:hover {
+            background: #1a1a1a;
+            border-color: #1a1a1a;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* ══════════ HERO / QUOTE SECTION ══════════ */
+        .hero-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 30px 28px;
+            position: relative;
+        }
+
+        /* Decorative subtle ring behind quote */
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            opacity: 0.4;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -55%);
+            animation: rotateSlow 30s linear infinite;
+        }
+        @keyframes rotateSlow {
+            from {
+                transform: translate(-50%, -55%) rotate(0deg);
+            }
+            to {
+                transform: translate(-50%, -55%) rotate(360deg);
+            }
+        }
+
+        .quote-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.8;
+            animation: floatUpDown 3s ease-in-out infinite;
+        }
+        @keyframes floatUpDown {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .motivation-quote {
+            font-size: 22px;
+            font-weight: 300;
+            color: var(--text-primary);
+            line-height: 1.4;
+            letter-spacing: -0.3px;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+        .motivation-quote .highlight {
+            font-weight: 600;
+            color: var(--cta);
+        }
+
+        .quote-author {
+            font-size: 13px;
+            color: var(--text-tertiary);
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            margin-bottom: 32px;
+        }
+
+        .divider-line {
+            width: 40px;
+            height: 2px;
+            background: var(--border);
+            border-radius: 2px;
+            margin: 0 auto 20px;
+        }
+
+        .sub-tagline {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 400;
+            letter-spacing: 0.3px;
+            line-height: 1.6;
+        }
+
+        .cta-button {
+            margin-top: 32px;
+            padding: 14px 40px;
+            border-radius: var(--radius-full);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            background: var(--cta);
+            color: #fff;
+            border: none;
+            letter-spacing: 0.3px;
+            transition: all 0.25s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .cta-button:hover {
+            background: #1a1a1a;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+        }
+        .cta-button .arrow {
+            transition: transform 0.25s ease;
+            font-size: 16px;
+        }
+        .cta-button:hover .arrow {
+            transform: translateX(4px);
+        }
+
+        /* ══════════ FOOTER ══════════ */
+        .footer {
+            padding: 16px 20px 20px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border);
+        }
+        .footer-left {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            font-weight: 500;
+        }
+        .footer-links {
+            display: flex;
+            gap: 16px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .footer-links a:hover {
+            color: var(--text-primary);
+        }
+        .footer-social {
+            display: flex;
+            gap: 10px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* ───── Fade-in Animation ───── */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-in {
+            animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .delay-1 {
+            animation-delay: 0.2s;
+            opacity: 0;
+        }
+        .delay-2 {
+            animation-delay: 0.4s;
+            opacity: 0;
+        }
+        .delay-3 {
+            animation-delay: 0.6s;
+            opacity: 0;
+        }
+        .delay-4 {
+            animation-delay: 0.8s;
+            opacity: 0;
+        }
+
+        /* ───── Responsive ───── */
+        @media (max-width: 380px) {
+            .hero-section {
+                padding: 20px;
+            }
+            .motivation-quote {
+                font-size: 19px;
+            }
+            .cta-button {
+                padding: 12px 32px;
+                font-size: 14px;
+            }
+            .btn-ghost,
+            .btn-filled {
+                font-size: 12px;
+                padding: 7px 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ╔══════════════════════════╗ -->
+    <!-- ║    AURAFUEL APP SHELL   ║ -->
+    <!-- ╚══════════════════════════╝ -->
+    <div class="app-shell">
+
+        <!-- ═══════ HEADER ═══════ -->
+        <header class="header" id="header">
+            <div class="logo-section">
+                <span class="logo-icon">⚡</span>
+                <span class="logo-text">
+                    <span class="thin">aura</span>Fuel
+                </span>
+            </div>
+            <div class="header-actions">
+                <a href="login.html" class="btn-ghost">Log In</a>
+                <a href="signup.html" class="btn-filled">Sign Up</a>
+            </div>
+        </header>
+
+        <!-- ═══════ HERO / QUOTE ═══════ -->
+        <main class="hero-section">
+
+            <!-- Sparkle Icon -->
+            <div class="quote-icon animate-in delay-1">✨</div>
+
+            <!-- Dynamic Motivation Quote -->
+            <h1 class="motivation-quote animate-in delay-2" id="quoteText">
+                "Your <span class="highlight">body</span> can stand almost anything.<br>It's your <span class="highlight">mind</span> you have to convince."
+            </h1>
+
+            <p class="quote-author animate-in delay-3" id="quoteAuthor">— Unknown</p>
+
+            <div class="divider-line animate-in delay-3"></div>
+
+            <p class="sub-tagline animate-in delay-4">
+                Track calories · Fuel your body · Glow from within
+            </p>
+
+            <!-- CTA Button -->
+            <a href="signup.html" class="cta-button animate-in delay-4">
+                Start Your Journey
+                <span class="arrow">→</span>
+            </a>
+        </main>
+
+        <!-- ═══════ FOOTER ═══════ -->
+        <footer class="footer">
+            <span class="footer-left">© 2026 auraFuel</span>
+            <div class="footer-links">
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
+                <a href="#">Contact</a>
+            </div>
+            <div class="footer-social">
+                <span>📷</span>
+                <span>𝕏</span>
+                <span>💌</span>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- ══════════════════════════ -->
+    <!-- ║   INTERNAL JAVASCRIPT  ║ -->
+    <!-- ══════════════════════════ -->
+    <script>
+        (function() {
+            // ─── Motivation Quotes Array ───
+            const quotes = [
+                {
+                    text: 'Your <span class="highlight">body</span> can stand almost anything.<br>It\'s your <span class="highlight">mind</span> you have to convince.',
+                    author: '— Unknown'
+                },
+                {
+                    text: 'The only <span class="highlight">bad workout</span> is the one that <span class="highlight">didn\'t happen</span>.',
+                    author: '— Unknown'
+                },
+                {
+                    text: '<span class="highlight">Strength</span> does not come from the body.<br>It comes from the <span class="highlight">will</span>.',
+                    author: '— Unknown'
+                },
+                {
+                    text: 'Take care of your <span class="highlight">body</span>.<br>It\'s the only place you have to <span class="highlight">live</span>.',
+                    author: '— Jim Rohn'
+                },
+                {
+                    text: 'Your <span class="highlight">aura</span> is your energy.<br>Fuel it <span class="highlight">wisely</span>.',
+                    author: '— auraFuel'
+                },
+                {
+                    text: 'Don\'t stop until you\'re <span class="highlight">proud</span>.',
+                    author: '— Unknown'
+                },
+                {
+                    text: 'She <span class="highlight">believed</span> she could,<br>so she <span class="highlight">did</span>.',
+                    author: '— R.S. Grey'
+                },
+                {
+                    text: 'Small <span class="highlight">daily</span> improvements<br>lead to <span class="highlight">stunning</span> results.',
+                    author: '— Robin Sharma'
+                }
+            ];
+
+            const quoteTextEl = document.getElementById('quoteText');
+            const quoteAuthorEl = document.getElementById('quoteAuthor');
+
+            // ─── Pick Random Quote on Load ───
+            function setRandomQuote() {
+                const randomIndex = Math.floor(Math.random() * quotes.length);
+                const selectedQuote = quotes[randomIndex];
+                quoteTextEl.innerHTML = selectedQuote.text;
+                quoteAuthorEl.textContent = selectedQuote.author;
+            }
+
+            // Set initial quote
+            setRandomQuote();
+
+            // ─── Rotate Quote Every 8 Seconds ───
+            setInterval(() => {
+                // Fade out, change, fade in effect
+                quoteTextEl.style.opacity = '0';
+                quoteTextEl.style.transition = 'opacity 0.4s ease';
+                quoteAuthorEl.style.opacity = '0';
+                quoteAuthorEl.style.transition = 'opacity 0.4s ease';
+
+                setTimeout(() => {
+                    setRandomQuote();
+                    quoteTextEl.style.opacity = '1';
+                    quoteAuthorEl.style.opacity = '1';
+                }, 400);
+            }, 8000);
+
+            // ─── Console Welcome ───
+            console.log('⚡ auraFuel · Index Ready');
+            console.log('💫 Fuel Your Aura · Stay Powerful');
+            console.log('🖤 Monochrome Minimalist Design');
+            console.log('👩‍💻 Built for Fitness Freaks');
+
+        })();
+    </script>
+
+</body>
+</html>

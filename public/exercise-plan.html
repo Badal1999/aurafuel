@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>⚡ auraFuel · Exercise Plan</title>
+    <style>
+        :root {
+            --bg: #ffffff; --surface: #fafafa; --border: #e5e5e5;
+            --text-primary: #1a1a1a; --text-secondary: #8c8c8c; --text-tertiary: #b0b0b0;
+            --cta: #000000; --success: #10b981;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+            --shadow-md: 0 6px 16px rgba(0,0,0,0.08);
+            --shadow-lg: 0 12px 28px rgba(0,0,0,0.12);
+            --radius-sm: 10px; --radius-md: 14px; --radius-lg: 18px; --radius-xl: 24px; --radius-full: 999px;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: #f5f5f5; color: var(--text-primary);
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; padding: 16px;
+        }
+        .app-shell {
+            width: 100%; max-width: 420px; height: 720px;
+            background: var(--bg); border-radius: var(--radius-xl);
+            overflow: hidden; box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border); display: flex; flex-direction: column;
+        }
+        .header {
+            display: flex; align-items: center; gap: 10px;
+            padding: 18px 18px 12px 18px; flex-shrink: 0;
+        }
+        .back-btn {
+            width: 34px; height: 34px; border-radius: 50%;
+            background: var(--surface); border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 16px; text-decoration: none;
+            color: var(--text-primary);
+        }
+        .page-title { font-size: 17px; font-weight: 700; }
+        .header-spacer { width: 34px; }
+        .main-content { flex: 1; overflow-y: auto; padding: 10px 18px 20px 18px; }
+
+        .split-cards, .mode-cards { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+        .split-card, .mode-card {
+            padding: 16px; border-radius: var(--radius-lg);
+            border: 2px solid var(--border); background: var(--surface);
+            cursor: pointer; display: flex; align-items: center; gap: 12px; position: relative;
+        }
+        .split-card.selected, .mode-card.selected { border-color: var(--cta); }
+        .split-card.selected::after, .mode-card.selected::after {
+            content: '✓'; position: absolute; top: 12px; right: 14px;
+            font-size: 15px; font-weight: 700; color: var(--cta);
+        }
+        .split-icon, .mode-icon { font-size: 24px; width: 46px; height: 46px; background: #f5f5f5; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; }
+        .split-info, .mode-info { flex: 1; }
+        .split-name, .mode-name { font-size: 15px; font-weight: 700; }
+        .split-desc, .mode-desc { font-size: 11px; color: var(--text-tertiary); }
+
+        .btn {
+            width: 100%; padding: 14px; border-radius: var(--radius-full);
+            font-size: 14px; font-weight: 600; cursor: pointer;
+            background: var(--cta); color: #fff; border: none;
+            font-family: inherit; margin-top: 16px;
+        }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+
+        .user-banner {
+            background: var(--surface); border-radius: var(--radius-md);
+            padding: 14px; border: 1px solid var(--border);
+            margin-bottom: 16px; display: flex; justify-content: space-between;
+            flex-wrap: wrap; gap: 8px; font-size: 12px; color: var(--text-secondary);
+        }
+        .user-banner span { font-weight: 600; color: var(--text-primary); }
+        .section-title { font-size: 14px; font-weight: 700; margin-bottom: 10px; }
+        .exercise-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius-md); padding: 14px; margin-bottom: 10px;
+        }
+        .exercise-name { font-weight: 700; font-size: 14px; margin-bottom: 6px; }
+        .exercise-detail { font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+        .weekly-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; margin-bottom: 16px;
+        }
+        .day-box {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); padding: 10px; text-align: center;
+            font-size: 11px; color: var(--text-secondary);
+        }
+        .day-box strong { display: block; color: var(--text-primary); font-size: 13px; }
+        .day-box.rest { background: #f9f9f9; }
+    </style>
+</head>
+<body>
+<div class="app-shell">
+    <header class="header">
+        <a href="dashboard.html" class="back-btn">←</a>
+        <span class="page-title">🏋️ Exercise Plan</span>
+        <div class="header-spacer"></div>
+    </header>
+    <div class="main-content" id="content"></div>
+</div>
+<script>
+    (function() {
+        const currentUser = JSON.parse(localStorage.getItem('aurafuel_currentUser') || sessionStorage.getItem('aurafuel_currentUser'));
+        if (!currentUser) { window.location.href = 'login.html'; return; }
+        const goal = currentUser.goal || 'maintenance';
+        const weight = currentUser.weight || 62;
+        const container = document.getElementById('content');
+        const token = localStorage.getItem('aurafuel_token') || sessionStorage.getItem('aurafuel_token');
+
+        const splits = [
+            { id: 'full_body', name: 'Full Body', desc: 'Train all muscles 3x/week.', icon: '🔄' },
+            { id: 'upper_lower', name: 'Upper / Lower', desc: 'Alternate upper & lower body.', icon: '↕️' },
+            { id: 'ppl', name: 'Push / Pull / Legs', desc: '6-day cycle. Best for muscle building.', icon: '🔺' },
+            { id: 'bro_split', name: 'Bro Split', desc: 'One muscle group per day. For advanced lifters.', icon: '💪' }
+        ];
+
+        // ─── Exercise Pools (same as before) ───
+        const bodyweightPool = {
+            push: [
+                { name: 'Push-ups', sets: '3x15', rest: '45s' },
+                { name: 'Diamond Push-ups', sets: '3x10', rest: '45s' },
+                { name: 'Pike Push-ups', sets: '3x10', rest: '45s' },
+                { name: 'Dips', sets: '3x12', rest: '45s' },
+                { name: 'Decline Push-ups', sets: '3x12', rest: '45s' }
+            ],
+            pull: [
+                { name: 'Pull-ups', sets: '3x8', rest: '45s' },
+                { name: 'Chin-ups', sets: '3x8', rest: '45s' },
+                { name: 'Bodyweight Rows', sets: '3x12', rest: '45s' },
+                { name: 'Supermans', sets: '3x15', rest: '30s' },
+                { name: 'Isometric Bicep Hold', sets: '3x45s', rest: '30s' }
+            ],
+            legs: [
+                { name: 'Squats', sets: '3x15', rest: '45s' },
+                { name: 'Lunges', sets: '3x12 each', rest: '45s' },
+                { name: 'Glute Bridges', sets: '3x20', rest: '45s' },
+                { name: 'Calf Raises', sets: '3x25', rest: '30s' },
+                { name: 'Wall Sit', sets: '3x45s', rest: '30s' }
+            ],
+            core: [
+                { name: 'Plank', sets: '3x60s', rest: '30s' },
+                { name: 'Bicycle Crunches', sets: '3x20', rest: '30s' },
+                { name: 'Leg Raises', sets: '3x15', rest: '30s' }
+            ],
+            cardio: [
+                { name: 'Burpees', sets: '3x10', rest: '30s' },
+                { name: 'Mountain Climbers', sets: '3x30s', rest: '30s' },
+                { name: 'High Knees', sets: '3x45s', rest: '30s' },
+                { name: 'Jump Squats', sets: '3x15', rest: '30s' }
+            ]
+        };
+
+        const machinePool = {
+            push: [
+                { name: 'Chest Press Machine', sets: '3x12', rest: '45s' },
+                { name: 'Shoulder Press Machine', sets: '3x12', rest: '45s' },
+                { name: 'Tricep Pushdown', sets: '3x15', rest: '45s' },
+                { name: 'Pec Deck', sets: '3x15', rest: '45s' },
+                { name: 'Lateral Raise Machine', sets: '3x15', rest: '45s' }
+            ],
+            pull: [
+                { name: 'Lat Pulldown', sets: '3x12', rest: '45s' },
+                { name: 'Seated Cable Row', sets: '3x12', rest: '45s' },
+                { name: 'Face Pull', sets: '3x15', rest: '45s' },
+                { name: 'Bicep Curl Machine', sets: '3x12', rest: '45s' },
+                { name: 'Straight-Arm Pulldown', sets: '3x12', rest: '45s' }
+            ],
+            legs: [
+                { name: 'Leg Press', sets: '3x12', rest: '45s' },
+                { name: 'Leg Extension', sets: '3x15', rest: '45s' },
+                { name: 'Seated Leg Curl', sets: '3x12', rest: '45s' },
+                { name: 'Calf Raise Machine', sets: '3x20', rest: '30s' },
+                { name: 'Abductor Machine', sets: '3x15', rest: '30s' }
+            ],
+            core: [
+                { name: 'Cable Woodchop', sets: '3x15', rest: '45s' },
+                { name: 'Back Extension', sets: '3x15', rest: '45s' }
+            ],
+            cardio: [
+                { name: 'Rowing Machine', sets: '5 min', rest: '-' },
+                { name: 'Elliptical', sets: '5 min', rest: '-' },
+                { name: 'Treadmill Intervals', sets: '5x1 min fast', rest: '30s' }
+            ]
+        };
+
+        const intensity = {
+            weight_loss: { multiplier: 1, restShort: '30s', restLong: '30s', sets: '3', extraCardio: true },
+            muscle_gain: { multiplier: 1.3, restShort: '90s', restLong: '60s', sets: '4', extraCardio: false },
+            maintenance: { multiplier: 1, restShort: '60s', restLong: '45s', sets: '3', extraCardio: false }
+        };
+
+        function adjustExercise(ex, goal) {
+            const int = intensity[goal];
+            const sets = int.sets;
+            const rest = ex.rest === '-' ? '-' : (ex.rest.includes('30s') ? int.restShort : int.restLong);
+            const name = ex.name;
+            const defaultReps = ex.sets.match(/\d+x(\d+)/) ? parseInt(ex.sets.match(/\d+x(\d+)/)[1]) : 15;
+            const reps = Math.max(6, Math.round(defaultReps * int.multiplier));
+            return { name, sets: sets + 'x' + reps, rest };
+        }
+
+        function buildSplitData() {
+            const data = {};
+            for (const split of splits) {
+                data[split.id] = {};
+                for (const mode of ['bodyweight', 'machine']) {
+                    data[split.id][mode] = {};
+                    for (const g of ['weight_loss', 'muscle_gain', 'maintenance']) {
+                        const schedule = [];
+                        const workouts = [];
+                        if (split.id === 'full_body') {
+                            schedule.push('Full A', 'Cardio', 'Full B', 'Rest', 'Full C', 'Cardio', 'Rest');
+                            for (let v = 0; v < 3; v++) {
+                                const mainEx = [];
+                                const parts = ['push', 'pull', 'legs', 'core'];
+                                parts.forEach(p => {
+                                    const pool = mode === 'machine' ? machinePool : bodyweightPool;
+                                    const arr = pool[p] || [];
+                                    const start = (v * 2) % arr.length;
+                                    for (let i = 0; i < Math.min(2, arr.length); i++) {
+                                        const idx = (start + i) % arr.length;
+                                        mainEx.push(adjustExercise(arr[idx], g));
+                                    }
+                                });
+                                workouts.push({
+                                    name: 'Full Body ' + String.fromCharCode(65 + v),
+                                    warmup: '5 min ' + (mode === 'machine' ? 'treadmill walk' : 'jumping jacks'),
+                                    main: mainEx,
+                                    cooldown: '5 min full body stretch'
+                                });
+                            }
+                        } else if (split.id === 'upper_lower') {
+                            schedule.push('Upper A', 'Lower A', 'Cardio', 'Upper B', 'Lower B', 'Cardio', 'Rest');
+                            for (const part of ['Upper', 'Lower']) {
+                                for (let v = 0; v < 2; v++) {
+                                    const muscle = part === 'Upper' ? ['push', 'pull'] : ['legs', 'core'];
+                                    const mainEx = [];
+                                    muscle.forEach(m => {
+                                        const pool = mode === 'machine' ? machinePool : bodyweightPool;
+                                        const arr = pool[m] || [];
+                                        const start = (v * 2) % arr.length;
+                                        for (let i = 0; i < Math.min(3, arr.length); i++) {
+                                            const idx = (start + i) % arr.length;
+                                            mainEx.push(adjustExercise(arr[idx], g));
+                                        }
+                                    });
+                                    workouts.push({
+                                        name: part + ' ' + String.fromCharCode(65 + v),
+                                        warmup: '5 min ' + (part === 'Upper' ? 'arm circles' : 'leg swings'),
+                                        main: mainEx,
+                                        cooldown: '5 min ' + (part === 'Upper' ? 'upper body stretch' : 'lower body stretch')
+                                    });
+                                }
+                            }
+                        } else if (split.id === 'ppl') {
+                            schedule.push('Push A', 'Pull A', 'Legs A', 'Push B', 'Pull B', 'Legs B', 'Rest');
+                            const parts = ['Push', 'Pull', 'Legs'];
+                            parts.forEach(p => {
+                                for (let v = 0; v < 2; v++) {
+                                    const muscle = p.toLowerCase();
+                                    const mainEx = [];
+                                    const pool = mode === 'machine' ? machinePool : bodyweightPool;
+                                    const arr = pool[muscle] || [];
+                                    const start = (v * 2) % arr.length;
+                                    for (let i = 0; i < 5; i++) {
+                                        const idx = (start + i) % arr.length;
+                                        mainEx.push(adjustExercise(arr[idx], g));
+                                    }
+                                    workouts.push({
+                                        name: p + ' ' + String.fromCharCode(65 + v),
+                                        warmup: '5 min ' + (muscle === 'legs' ? 'leg swings' : 'light cardio'),
+                                        main: mainEx,
+                                        cooldown: '5 min ' + (muscle === 'legs' ? 'leg stretch' : 'upper body stretch')
+                                    });
+                                }
+                            });
+                        } else if (split.id === 'bro_split') {
+                            schedule.push('Chest A', 'Back A', 'Shoulders A', 'Arms A', 'Legs A', 'Cardio', 'Rest');
+                            const muscles = ['Chest', 'Back', 'Shoulders', 'Arms', 'Legs'];
+                            muscles.forEach(m => {
+                                const muscleKey = m.toLowerCase() === 'arms' ? 'push' : (m.toLowerCase() === 'chest' ? 'push' : (m.toLowerCase() === 'shoulders' ? 'push' : (m.toLowerCase() === 'back' ? 'pull' : 'legs')));
+                                for (let v = 0; v < 2; v++) {
+                                    const mainEx = [];
+                                    const pool = mode === 'machine' ? machinePool : bodyweightPool;
+                                    const arr = pool[muscleKey] || pool['push'];
+                                    const start = (v * 3) % arr.length;
+                                    for (let i = 0; i < 5; i++) {
+                                        const idx = (start + i) % arr.length;
+                                        mainEx.push(adjustExercise(arr[idx], g));
+                                    }
+                                    workouts.push({
+                                        name: m + ' ' + String.fromCharCode(65 + v),
+                                        warmup: '5 min ' + (mode === 'machine' ? 'light machine warmup' : 'dynamic stretches'),
+                                        main: mainEx,
+                                        cooldown: '5 min ' + m + ' stretch'
+                                    });
+                                }
+                            });
+                        }
+                        data[split.id][mode][g] = { schedule, workouts };
+                    }
+                }
+            }
+            return data;
+        }
+
+        const exercises = buildSplitData();
+
+        let selectedSplit = null;
+        let selectedMode = null;
+
+        // ─── Fetch latest exercise plan from backend ───
+        async function fetchLatestExercisePlan() {
+            try {
+                const res = await fetch('http://localhost:5000/api/exercise/latest', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                return data.exercise;
+            } catch (err) {
+                console.error('Failed to fetch latest exercise:', err);
+                return null;
+            }
+        }
+
+        // ─── Render workout directly from saved DB plan ───
+        function renderWorkoutFromDB(splitId, splitName, mode, plan) {
+            const modeName = mode === 'machine' ? 'Gym Machines' : 'Bodyweight';
+            const goalLabels = { weight_loss: 'Fat Loss', muscle_gain: 'Muscle Gain', maintenance: 'Maintenance' };
+
+            container.innerHTML = `
+                <button class="btn" style="margin-bottom:16px; background:transparent; color:var(--text-primary); border:1px solid var(--border);" id="backToSplits">← Change Split</button>
+                <div class="user-banner">
+                    <div>👤 <span>${currentUser.fullName}</span></div>
+                    <div>🎯 <span>${goalLabels[plan.goal] || goalLabels[goal]}</span></div>
+                    <div>⚖️ <span>${weight} kg</span></div>
+                </div>
+                <h2 class="section-title">🏋️ ${splitName} · ${modeName} · ${goalLabels[plan.goal] || goalLabels[goal]}</h2>
+                <div class="weekly-grid">
+                    ${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((day,i) => {
+                        const val = plan.schedule[i];
+                        const isRest = val === 'Rest' || val === 'Active Rest';
+                        return `<div class="day-box ${isRest ? 'rest' : ''}"><strong>${day}</strong>${val}</div>`;
+                    }).join('')}
+                </div>
+                ${plan.workouts.map(w => `
+                    <div class="exercise-card" style="margin-bottom:16px;">
+                        <div class="exercise-name">💪 ${w.name}</div>
+                        <div class="exercise-detail"><strong>🔥 Warm-Up:</strong> ${w.warmup}</div>
+                        ${w.main.map(e => `<div class="exercise-detail" style="margin-top:6px;">• ${e.name} – ${e.sets} (Rest: ${e.rest})</div>`).join('')}
+                        <div class="exercise-detail" style="margin-top:6px;"><strong>🧘 Cool Down:</strong> ${w.cooldown}</div>
+                    </div>
+                `).join('')}
+                <p style="font-size:11px; color:var(--text-tertiary); margin-top:4px;">Perform the corresponding workout on each day as shown in the schedule above.</p>
+                <button class="btn" onclick="window.location.href='dashboard.html'">⚡ Go to Dashboard</button>
+            `;
+
+            document.getElementById('backToSplits').addEventListener('click', () => {
+                renderSelectSplit();
+            });
+        }
+
+        function renderSelectSplit() {
+            container.innerHTML = `
+                <h2 style="font-size:20px; font-weight:700; margin-bottom:6px;">Choose Your Split</h2>
+                <p style="font-size:13px; color:var(--text-secondary); margin-bottom:16px;">Select how you want to divide your weekly workouts</p>
+                <div class="split-cards" id="splitCards">
+                    ${splits.map(s => `
+                        <div class="split-card" data-id="${s.id}">
+                            <div class="split-icon">${s.icon}</div>
+                            <div class="split-info">
+                                <div class="split-name">${s.name}</div>
+                                <div class="split-desc">${s.desc}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                <button class="btn" id="continueSplitBtn" disabled>⚡ Continue</button>
+            `;
+            document.querySelectorAll('.split-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    document.querySelectorAll('.split-card').forEach(c => c.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedSplit = this.dataset.id;
+                    document.getElementById('continueSplitBtn').disabled = false;
+                });
+            });
+            document.getElementById('continueSplitBtn').addEventListener('click', () => renderModeSelection(selectedSplit));
+        }
+
+        function renderModeSelection(splitId) {
+            const splitName = splits.find(s => s.id === splitId)?.name || splitId;
+            container.innerHTML = `
+                <h2 style="font-size:20px; font-weight:700; margin-bottom:6px;">Choose Mode</h2>
+                <p style="font-size:13px; color:var(--text-secondary); margin-bottom:16px;">How do you want to train ${splitName}?</p>
+                <div class="mode-cards" id="modeCards">
+                    <div class="mode-card" data-mode="bodyweight">
+                        <div class="mode-icon">🏠</div>
+                        <div class="mode-info"><div class="mode-name">Bodyweight</div><div class="mode-desc">No equipment – train at home or outdoors.</div></div>
+                    </div>
+                    <div class="mode-card" data-mode="machine">
+                        <div class="mode-icon">🏋️</div>
+                        <div class="mode-info"><div class="mode-name">Gym Machines</div><div class="mode-desc">Use gym machines for targeted resistance.</div></div>
+                    </div>
+                </div>
+                <button class="btn" id="continueModeBtn" disabled>⚡ Continue</button>
+                <button class="btn" style="background:transparent; color:var(--text-primary); border:1px solid var(--border);" id="backToSplits">← Back to Splits</button>
+            `;
+            document.querySelectorAll('.mode-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedMode = this.dataset.mode;
+                    document.getElementById('continueModeBtn').disabled = false;
+                });
+            });
+            document.getElementById('continueModeBtn').addEventListener('click', () => renderWorkout(splitId, selectedMode));
+            document.getElementById('backToSplits').addEventListener('click', () => renderSelectSplit());
+        }
+
+        function renderWorkout(splitId, mode) {
+            const splitData = exercises[splitId];
+            if (!splitData || !splitData[mode] || !splitData[mode][goal]) {
+                alert('Plan not available for this mode/goal. Try another combination.');
+                return;
+            }
+            const plan = splitData[mode][goal];
+            const splitName = splits.find(s => s.id === splitId)?.name || splitId;
+            const modeName = mode === 'bodyweight' ? 'Bodyweight' : 'Gym Machines';
+            const goalLabels = { weight_loss: 'Fat Loss', muscle_gain: 'Muscle Gain', maintenance: 'Maintenance' };
+
+            // Save to backend
+            fetch('http://localhost:5000/api/exercise', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    split: splitId,
+                    splitName: splitName,
+                    mode: mode,
+                    goal: goal,
+                    schedule: plan.schedule,
+                    workouts: plan.workouts
+                })
+            })
+            .then(res => res.json())
+            .then(data => console.log('✅ Exercise saved:', data))
+            .catch(err => console.error('❌ Exercise save failed:', err));
+
+            container.innerHTML = `
+                <button class="btn" style="margin-bottom:16px; background:transparent; color:var(--text-primary); border:1px solid var(--border);" id="backToMode">← Change Mode</button>
+                <div class="user-banner">
+                    <div>👤 <span>${currentUser.fullName}</span></div>
+                    <div>🎯 <span>${goalLabels[goal]}</span></div>
+                    <div>⚖️ <span>${weight} kg</span></div>
+                </div>
+                <h2 class="section-title">🏋️ ${splitName} · ${modeName} · ${goalLabels[goal]}</h2>
+                <div class="weekly-grid">
+                    ${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((day,i) => {
+                        const val = plan.schedule[i];
+                        const isRest = val === 'Rest' || val === 'Active Rest';
+                        return `<div class="day-box ${isRest ? 'rest' : ''}"><strong>${day}</strong>${val}</div>`;
+                    }).join('')}
+                </div>
+                ${plan.workouts.map(w => `
+                    <div class="exercise-card" style="margin-bottom:16px;">
+                        <div class="exercise-name">💪 ${w.name}</div>
+                        <div class="exercise-detail"><strong>🔥 Warm-Up:</strong> ${w.warmup}</div>
+                        ${w.main.map(e => `<div class="exercise-detail" style="margin-top:6px;">• ${e.name} – ${e.sets} (Rest: ${e.rest})</div>`).join('')}
+                        <div class="exercise-detail" style="margin-top:6px;"><strong>🧘 Cool Down:</strong> ${w.cooldown}</div>
+                    </div>
+                `).join('')}
+                <p style="font-size:11px; color:var(--text-tertiary); margin-top:4px;">Perform the corresponding workout on each day as shown in the schedule above.</p>
+                <button class="btn" onclick="window.location.href='dashboard.html'">⚡ Go to Dashboard</button>
+            `;
+            document.getElementById('backToMode').addEventListener('click', () => { selectedMode = null; renderModeSelection(splitId); });
+        }
+
+        // ─── Initial load: check for existing plan ───
+        fetchLatestExercisePlan().then(existing => {
+            if (existing) {
+                const splitId = existing.split;
+                const mode = existing.mode;
+                const splitName = existing.splitName || splits.find(s => s.id === splitId)?.name || splitId;
+                selectedSplit = splitId;
+                selectedMode = mode;
+                renderWorkoutFromDB(splitId, splitName, mode, existing);
+            } else {
+                renderSelectSplit();
+            }
+        });
+    })();
+</script>
+</body>
+</html>

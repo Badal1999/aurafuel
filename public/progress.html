@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>⚡ auraFuel · Progress</title>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --surface: #fafafa;
+            --border: #e5e5e5;
+            --text-primary: #1a1a1a;
+            --text-secondary: #8c8c8c;
+            --text-tertiary: #b0b0b0;
+            --cta: #000000;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+            --shadow-md: 0 6px 16px rgba(0,0,0,0.08);
+            --shadow-lg: 0 12px 28px rgba(0,0,0,0.12);
+            --radius-sm: 12px;
+            --radius-md: 16px;
+            --radius-lg: 20px;
+            --radius-xl: 24px;
+            --radius-full: 999px;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: #f5f5f5;
+            color: var(--text-primary);
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; padding: 16px;
+            -webkit-font-smoothing: antialiased;
+        }
+        .app-shell {
+            width: 100%; max-width: 420px; height: 720px;
+            background: var(--bg); border-radius: var(--radius-xl);
+            overflow: hidden; box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border); display: flex; flex-direction: column;
+        }
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 18px 20px 14px 20px; flex-shrink: 0;
+        }
+        .back-btn {
+            width: 34px; height: 34px; border-radius: 50%; background: var(--surface);
+            border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 16px; text-decoration: none; color: var(--text-primary);
+        }
+        .page-title { font-size: 17px; font-weight: 700; }
+        .header-spacer { width: 34px; }
+
+        .main-content { flex: 1; overflow-y: auto; padding: 10px 18px 20px 18px; }
+
+        .section-title { font-size: 14px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+
+        .card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius-md); padding: 14px; margin-bottom: 16px;
+        }
+
+        .chart-container { display: flex; gap: 4px; align-items: flex-end; height: 100px; }
+        .chart-bar {
+            flex: 1; background: var(--border); border-radius: 4px 4px 0 0;
+            position: relative; min-height: 4px;
+        }
+        .chart-bar.filled { background: var(--cta); }
+        .chart-bar-label { font-size: 8px; color: var(--text-tertiary); text-align: center; margin-top: 4px; }
+        .chart-bar-value { font-size: 8px; color: var(--text-secondary); text-align: center; display: block; }
+
+        .calorie-day { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+        .calorie-day:last-child { border-bottom: none; }
+        .calorie-day-name { color: var(--text-secondary); }
+        .calorie-day-cal { font-weight: 600; }
+
+        .water-grid { display: flex; gap: 4px; }
+        .water-day { flex: 1; text-align: center; }
+        .water-icon { font-size: 16px; }
+        .water-num { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
+
+        .streak-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+        .streak-cell {
+            aspect-ratio: 1; background: var(--border); border-radius: 4px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 9px; color: var(--text-tertiary); font-weight: 500;
+        }
+        .streak-cell.active { background: var(--success); color: #fff; font-weight: 700; }
+        .streak-cell.today { border: 2px solid var(--cta); }
+
+        .bottom-nav {
+            display: flex; justify-content: space-around; align-items: center;
+            padding: 8px 16px 14px 16px; border-top: 1px solid var(--border); background: var(--bg);
+        }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; gap: 3px;
+            cursor: pointer; color: var(--text-tertiary); font-size: 10px; font-weight: 500;
+            text-decoration: none;
+        }
+        .nav-item.active { color: var(--text-primary); font-weight: 600; }
+        .nav-icon { font-size: 20px; }
+        .nav-add-btn {
+            width: 44px; height: 44px; background: var(--cta); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+            margin-top: -18px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); text-decoration: none;
+        }
+        .nav-add-icon { font-size: 22px; color: #fff; font-weight: 300; }
+
+        @media (max-width: 380px) {
+            .card { padding: 10px; }
+        }
+    </style>
+</head>
+<body>
+<div class="app-shell">
+    <header class="header">
+        <a href="dashboard.html" class="back-btn">←</a>
+        <span class="page-title">📊 Progress</span>
+        <div class="header-spacer"></div>
+    </header>
+    <div class="main-content">
+        <!-- Weight Trend -->
+        <div class="section-title">⚖️ Weight Trend (Last 7 Days)</div>
+        <div class="card">
+            <div class="chart-container" id="weightChart"></div>
+            <div style="display:flex; justify-content:space-between; margin-top:4px;" id="weightLabels"></div>
+            <div style="font-size:10px; color:var(--text-secondary); margin-top:6px; text-align:center;" id="weightSummary"></div>
+        </div>
+
+        <!-- Calorie Intake -->
+        <div class="section-title">🔥 Calorie Intake (Last 7 Days)</div>
+        <div class="card" id="calorieCard"></div>
+
+        <!-- Water Intake -->
+        <div class="section-title">💧 Water Intake (Last 7 Days)</div>
+        <div class="card">
+            <div class="water-grid" id="waterGrid"></div>
+            <div style="font-size:10px; color:var(--text-secondary); margin-top:8px; text-align:center;" id="waterSummary"></div>
+        </div>
+
+        <!-- Exercise Consistency -->
+        <div class="section-title">🏋️ Exercise This Week</div>
+        <div class="card">
+            <div style="display:flex; gap:4px; align-items:flex-end; height:40px;" id="exerciseChart"></div>
+            <div style="display:flex; justify-content:space-between; margin-top:4px; font-size:9px; color:var(--text-secondary);" id="exerciseLabels"></div>
+            <div style="font-size:10px; color:var(--text-secondary); margin-top:6px; text-align:center;" id="exerciseSummary"></div>
+        </div>
+
+        <!-- Streak Calendar -->
+        <div class="section-title">🔥 30-Day Streak</div>
+        <div class="card">
+            <div class="streak-grid" id="streakGrid"></div>
+        </div>
+    </div>
+
+  <div class="bottom-nav">
+    <a href="dashboard.html" class="nav-item active"><span class="nav-icon">🏠</span><span>Home</span></a>
+    <a href="progress.html" class="nav-item"><span class="nav-icon">📊</span><span>Progress</span></a>
+    <a href="profile.html" class="nav-item"><span class="nav-icon">👤</span><span>Profile</span></a>
+</div>
+</div>
+
+<script>
+(async function() {
+    const currentUser = JSON.parse(localStorage.getItem('aurafuel_currentUser') || sessionStorage.getItem('aurafuel_currentUser'));
+    if (!currentUser) { window.location.href = 'login.html'; return; }
+    const token = localStorage.getItem('aurafuel_token') || sessionStorage.getItem('aurafuel_token');
+    const today = new Date();
+    const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+    // Helper to get last N days array
+    function getLastNDays(n) {
+        const days = [];
+        for (let i = n-1; i >= 0; i--) {
+            const d = new Date(today);
+            d.setDate(d.getDate() - i);
+            days.push(d.toISOString().split('T')[0]);
+        }
+        return days;
+    }
+
+    // ────────────────── WEIGHT TREND ──────────────────
+    async function loadWeightChart() {
+        const res = await fetch('http://localhost:5000/api/weight', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        const logs = data.logs || [];
+        const last7Days = getLastNDays(7);
+
+        const values = last7Days.map(date => {
+            const log = logs.find(l => l.date === date);
+            return log ? log.weight : null;
+        });
+
+        const validWeights = values.filter(v => v !== null);
+        const minW = validWeights.length ? Math.min(...validWeights) : 0;
+        const maxW = validWeights.length ? Math.max(...validWeights) : 100;
+        const range = maxW - minW || 1;
+
+        const container = document.getElementById('weightChart');
+        const labelsContainer = document.getElementById('weightLabels');
+        container.innerHTML = '';
+        labelsContainer.innerHTML = '';
+
+        last7Days.forEach((date, i) => {
+            const w = values[i];
+            const bar = document.createElement('div');
+            bar.className = 'chart-bar';
+            if (w) {
+                bar.classList.add('filled');
+                const heightPercent = ((w - minW) / range) * 60 + 20;
+                bar.style.height = heightPercent + '%';
+                const valSpan = document.createElement('span');
+                valSpan.className = 'chart-bar-value';
+                valSpan.textContent = w;
+                bar.appendChild(valSpan);
+            } else {
+                bar.style.height = '10%';
+            }
+            container.appendChild(bar);
+
+            const label = document.createElement('span');
+            label.className = 'chart-bar-label';
+            label.textContent = dayNames[new Date(date).getDay()];
+            labelsContainer.appendChild(label);
+        });
+
+        const startW = values[0];
+        const endW = values[values.length-1];
+        let diffStr = 'N/A';
+        if (startW !== null && endW !== null) {
+            const diff = (endW - startW).toFixed(1);
+            diffStr = (diff >= 0 ? '+' + diff : diff) + ' kg';
+        }
+        document.getElementById('weightSummary').textContent = `Start: ${startW || '?'} kg → Current: ${endW || '?'} kg (${diffStr})`;
+    }
+
+    // ────────────────── CALORIE INTAKE ──────────────────
+    async function loadCalorieIntake() {
+        const last7Days = getLastNDays(7);
+        const start = last7Days[0], end = last7Days[last7Days.length-1];
+        const res = await fetch(`http://localhost:5000/api/meals/range?start=${start}&end=${end}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        const meals = data.meals || [];
+
+        const container = document.getElementById('calorieCard');
+        container.innerHTML = '';
+
+        last7Days.forEach(date => {
+            const dayMeals = meals.filter(m => m.date === date);
+            const totalCal = dayMeals.reduce((sum, m) => sum + (m.totalCalories || 0), 0);
+            const dateObj = new Date(date);
+            const dayName = dayNames[dateObj.getDay()];
+            container.innerHTML += `<div class="calorie-day"><span class="calorie-day-name">${dayName} (${date})</span><span class="calorie-day-cal">${totalCal} kcal</span></div>`;
+        });
+    }
+
+    // ────────────────── WATER INTAKE ──────────────────
+    async function loadWaterIntake() {
+        const last7Days = getLastNDays(7);
+        const start = last7Days[0], end = last7Days[last7Days.length-1];
+        const res = await fetch(`http://localhost:5000/api/tracker/water/range?start=${start}&end=${end}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        const logs = data.logs || [];
+        const grid = document.getElementById('waterGrid');
+        grid.innerHTML = '';
+
+        let totalGlasses = 0, daysWithData = 0;
+        last7Days.forEach(date => {
+            const log = logs.find(l => l.date === date);
+            const glasses = log ? log.glasses : 0;
+            if (glasses > 0) daysWithData++;
+            totalGlasses += glasses;
+            const dayDiv = document.createElement('div');
+            dayDiv.className = 'water-day';
+            dayDiv.innerHTML = `<span class="water-icon">💧</span><div class="water-num">${glasses}/8</div>`;
+            grid.appendChild(dayDiv);
+        });
+
+        const avg = daysWithData > 0 ? (totalGlasses / daysWithData).toFixed(1) : 0;
+        const bestDay = logs.length ? Math.max(...logs.map(l => l.glasses)) : 0;
+        document.getElementById('waterSummary').textContent = `Best: ${bestDay}/8 · Average: ${avg} glasses/day`;
+    }
+
+    // ────────────────── EXERCISE CONSISTENCY ──────────────────
+    async function loadExerciseChart() {
+        const last7Days = getLastNDays(7);
+        const start = last7Days[0], end = last7Days[last7Days.length-1];
+        const res = await fetch(`http://localhost:5000/api/tracker/exercise/range?start=${start}&end=${end}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        const checkedDates = data.checkedDates || [];
+
+        const chartContainer = document.getElementById('exerciseChart');
+        const labelsContainer = document.getElementById('exerciseLabels');
+        chartContainer.innerHTML = '';
+        labelsContainer.innerHTML = '';
+
+        let count = 0;
+        last7Days.forEach((date, i) => {
+            const bar = document.createElement('div');
+            bar.style.flex = '1';
+            bar.style.borderRadius = '4px';
+            const isChecked = checkedDates.includes(date);
+            bar.style.background = isChecked ? 'var(--cta)' : 'var(--border)';
+            bar.style.height = isChecked ? '100%' : '40%';
+            chartContainer.appendChild(bar);
+
+            const label = document.createElement('span');
+            label.style.flex = '1';
+            label.style.textAlign = 'center';
+            label.textContent = dayNames[new Date(date).getDay()];
+            labelsContainer.appendChild(label);
+
+            if (isChecked) count++;
+        });
+
+        document.getElementById('exerciseSummary').textContent = `${count}/7 days · ${count >= 5 ? '🔥 Good consistency' : 'Keep pushing!'}`;
+    }
+
+    // ────────────────── STREAK CALENDAR ──────────────────
+    async function loadStreakCalendar() {
+        // Fetch all meal and exercise check dates for last 30 days
+        const last30Days = getLastNDays(30);
+        const start = last30Days[0], end = last30Days[last30Days.length-1];
+
+        const [mealRes, exerciseRes] = await Promise.all([
+            fetch(`http://localhost:5000/api/tracker/meal/${end}`), // we need a range route, but we can just get all by fetching streak route which gives dates? Actually we need per-day active status. We'll create a route /api/tracker/active-dates?start=...&end=... that returns array of dates with any activity. But we haven't defined that. For now, we can use the streak route's logic client-side by fetching meal checks and exercise checks separately. We don't have range route for meal checks. Let's improvise: we'll fetch the streak route which already returns the streak count; we need the calendar. We can loop through 30 days and check for each date using the same logic as streak? Too many calls. Better to define a new route /api/tracker/active-dates that returns all dates within range that have either a meal check or exercise check. We'll add that route.
+        ]);
+
+        // Temporary: we'll just draw an empty grid for now, and I'll provide the route later.
+        // Since we want full solution, let's provide the route first.
+    }
+
+    // We need a route: GET /api/tracker/active-dates?start=...&end=...
+    // Returns { dates: ["2026-05-20", ...] }
+
+    // So I'll add that route in the backend snippet.
+
+    // For now, I'll implement the calendar using that route.
+    async function loadStreakCalendar() {
+        const last30Days = getLastNDays(30);
+        const start = last30Days[0], end = last30Days[last30Days.length-1];
+        const res = await fetch(`http://localhost:5000/api/tracker/active-dates?start=${start}&end=${end}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        const activeDates = data.dates || [];
+        const grid = document.getElementById('streakGrid');
+        grid.innerHTML = '';
+        const todayStr = today.toISOString().split('T')[0];
+        last30Days.forEach(date => {
+            const cell = document.createElement('div');
+            cell.className = 'streak-cell';
+            if (activeDates.includes(date)) cell.classList.add('active');
+            if (date === todayStr) cell.classList.add('today');
+            const day = new Date(date).getDate();
+            cell.textContent = day;
+            grid.appendChild(cell);
+        });
+    }
+
+    // Add the missing route in routes/tracker.js:
+    // router.get('/active-dates', auth, async (req, res) => {
+    //     const { start, end } = req.query;
+    //     const mealDates = await MealCheck.distinct('date', { user: req.user._id, date: {$gte: start, $lte: end} });
+    //     const exerciseDates = await ExerciseCheck.distinct('date', { user: req.user._id, date: {$gte: start, $lte: end} });
+    //     const dates = [...new Set([...mealDates, ...exerciseDates])];
+    //     res.json({ dates });
+    // });
+
+    // Load all sections
+    await loadWeightChart();
+    await loadCalorieIntake();
+    await loadWaterIntake();
+    await loadExerciseChart();
+    await loadStreakCalendar();
+})();
+</script>
+</body>
+</html>

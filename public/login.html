@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>⚡ auraFuel · Log In</title>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --surface: #fafafa;
+            --border: #e5e5e5;
+            --text-primary: #1a1a1a;
+            --text-secondary: #8c8c8c;
+            --text-tertiary: #b0b0b0;
+            --cta: #000000;
+            --error: #ef4444;
+            --success: #10b981;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.12);
+            --radius-sm: 12px;
+            --radius-md: 16px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+            --radius-full: 999px;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: #f5f5f5;
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 16px;
+            -webkit-font-smoothing: antialiased;
+        }
+        .app-shell {
+            width: 100%;
+            max-width: 420px;
+            min-height: 640px;
+            background: var(--bg);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 20px 16px 20px;
+        }
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            text-decoration: none;
+        }
+        .logo-icon {
+            font-size: 26px;
+            color: var(--cta);
+            animation: boltPulse 2.5s ease-in-out infinite;
+            display: inline-block;
+        }
+        @keyframes boltPulse {
+            0%,
+            100% {
+                transform: scale(1) rotate(-5deg);
+            }
+            50% {
+                transform: scale(1.12) rotate(-2deg);
+            }
+        }
+        .logo-text {
+            font-size: 19px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.4px;
+        }
+        .logo-text .thin {
+            font-weight: 300;
+            color: var(--text-secondary);
+        }
+        .back-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-full);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+        .form-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 24px 30px 24px;
+        }
+        .form-header {
+            margin-bottom: 28px;
+        }
+        .form-title {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+        }
+        .form-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        .form-subtitle a {
+            color: var(--cta);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .login-tabs {
+            display: flex;
+            background: var(--surface);
+            border-radius: var(--radius-full);
+            padding: 4px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: var(--radius-full);
+            text-align: center;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            border: none;
+            background: transparent;
+            font-family: inherit;
+        }
+        .tab-btn.active {
+            background: var(--cta);
+            color: #fff;
+        }
+        .input-group {
+            margin-bottom: 18px;
+            position: relative;
+        }
+        .input-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 6px;
+        }
+        .input-field {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            background: var(--surface);
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+            outline: none;
+            font-family: inherit;
+        }
+        .input-field:focus {
+            border-color: var(--cta);
+            background: var(--bg);
+        }
+        .input-field::placeholder {
+            color: var(--text-tertiary);
+        }
+        .input-icon {
+            position: absolute;
+            right: 14px;
+            top: 38px;
+            font-size: 16px;
+            color: var(--text-tertiary);
+            pointer-events: none;
+        }
+        .input-icon.clickable {
+            pointer-events: auto;
+            cursor: pointer;
+        }
+        .row-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+        .remember-me input {
+            accent-color: var(--cta);
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        .forgot-link {
+            font-size: 13px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .forgot-link:hover {
+            color: var(--cta);
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            border-radius: var(--radius-full);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            background: var(--cta);
+            color: #fff;
+            border: none;
+            font-family: inherit;
+        }
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--error);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: var(--radius-full);
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        .toast.show {
+            opacity: 1;
+        }
+        .toast.success {
+            background: var(--success);
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-in {
+            animation: fadeInUp 0.5s ease forwards;
+        }
+        .delay-1 {
+            animation-delay: 0.1s;
+            opacity: 0;
+        }
+        .delay-2 {
+            animation-delay: 0.2s;
+            opacity: 0;
+        }
+        .delay-3 {
+            animation-delay: 0.3s;
+            opacity: 0;
+        }
+        .delay-4 {
+            animation-delay: 0.4s;
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-shell">
+        <header class="header">
+            <a href="index.html" class="logo-section">
+                <span class="logo-icon">⚡</span>
+                <span class="logo-text"><span class="thin">aura</span>Fuel</span>
+            </a>
+            <a href="index.html" class="back-btn">←</a>
+        </header>
+        <main class="form-section">
+            <div class="form-header animate-in delay-1">
+                <h1 class="form-title">Welcome Back</h1>
+                <p class="form-subtitle">Don't have an account? <a href="signup.html">Sign Up</a></p>
+            </div>
+            <div class="login-tabs animate-in delay-2" id="loginTabs">
+                <button class="tab-btn active" data-tab="email">📧 Email</button>
+                <button class="tab-btn" data-tab="mobile">📱 Mobile</button>
+            </div>
+            <div class="input-group animate-in delay-2" id="emailGroup">
+                <label class="input-label">Email Address</label>
+                <input type="email" class="input-field" id="emailInput" placeholder="you@example.com" autocomplete="email">
+                <span class="input-icon">✉️</span>
+                <p class="error-msg" id="emailError">Please enter a valid email</p>
+            </div>
+            <div class="input-group animate-in delay-2" id="mobileGroup" style="display:none;">
+                <label class="input-label">Mobile Number</label>
+                <input type="tel" class="input-field" id="mobileInput" placeholder="+91 9876543210" maxlength="13">
+                <p class="error-msg" id="mobileError">Enter a valid 10-digit mobile number</p>
+            </div>
+            <div class="input-group animate-in delay-3">
+                <label class="input-label">Password</label>
+                <input type="password" class="input-field" id="passwordInput" placeholder="Enter your password" autocomplete="current-password">
+                <span class="input-icon clickable" id="passwordToggle">👁️</span>
+                <p class="error-msg" id="passwordError">Password is required</p>
+            </div>
+            <div class="row-between animate-in delay-3">
+                <label class="remember-me"><input type="checkbox" id="rememberMe" checked> Remember me</label>
+                <a class="forgot-link" href="forgot-password.html">Forgot password?</a>
+            </div>
+            <button class="submit-btn animate-in delay-4" id="submitBtn">⚡ Log In</button>
+        </main>
+    </div>
+    <div class="toast" id="toast"></div>
+
+    <script>
+        (function() {
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const emailGroup = document.getElementById('emailGroup');
+            const mobileGroup = document.getElementById('mobileGroup');
+            const emailInput = document.getElementById('emailInput');
+            const mobileInput = document.getElementById('mobileInput');
+            const passwordInput = document.getElementById('passwordInput');
+            const submitBtn = document.getElementById('submitBtn');
+            const emailError = document.getElementById('emailError');
+            const mobileError = document.getElementById('mobileError');
+            const passwordError = document.getElementById('passwordError');
+            const passwordToggle = document.getElementById('passwordToggle');
+            const toast = document.getElementById('toast');
+
+            let activeTab = 'email';
+
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    activeTab = this.dataset.tab;
+                    if (activeTab === 'email') {
+                        emailGroup.style.display = 'block';
+                        mobileGroup.style.display = 'none';
+                        mobileInput.value = '';
+                        mobileError.classList.remove('show');
+                    } else {
+                        emailGroup.style.display = 'none';
+                        mobileGroup.style.display = 'block';
+                        emailInput.value = '';
+                        emailError.classList.remove('show');
+                    }
+                });
+            });
+
+            mobileInput.addEventListener('input', function() {
+                let value = this.value.replace(/\D/g, '');
+                if (value.length > 10) value = value.slice(0, 10);
+                if (value.length > 0) this.value = '+91 ' + value;
+                else this.value = '';
+                mobileError.classList.remove('show');
+            });
+
+            passwordToggle.addEventListener('click', function() {
+                passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
+                this.textContent = passwordInput.type === 'password' ? '👁️' : '🙈';
+            });
+
+            emailInput.addEventListener('input', () => emailError.classList.remove('show'));
+            passwordInput.addEventListener('input', () => passwordError.classList.remove('show'));
+
+            function showToast(msg, isSuccess = false) {
+                toast.textContent = msg;
+                toast.className = 'toast ' + (isSuccess ? 'success' : '');
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 2500);
+            }
+
+            function validateForm() {
+                let isValid = true;
+                if (activeTab === 'email') {
+                    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value.trim())) {
+                        emailError.classList.add('show');
+                        isValid = false;
+                    }
+                } else {
+                    if (mobileInput.value.replace(/\D/g, '').length !== 10) {
+                        mobileError.classList.add('show');
+                        isValid = false;
+                    }
+                }
+                if (passwordInput.value.length < 1) {
+                    passwordError.classList.add('show');
+                    isValid = false;
+                }
+                return isValid;
+            }
+
+            submitBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                submitBtn.disabled = true;
+                submitBtn.textContent = '⏳ Logging in...';
+
+                if (!validateForm()) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '⚡ Log In';
+                    showToast('Please fill all fields correctly', false);
+                    return;
+                }
+
+                const credential = activeTab === 'email' ?
+                    emailInput.value.trim().toLowerCase() :
+                    mobileInput.value.trim();
+                const password = passwordInput.value;
+                const rememberMe = document.getElementById('rememberMe').checked;
+
+                // ✅ API CALL TO BACKEND
+                fetch('http://localhost:5000/api/auth/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ credential, password })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.token) {
+                            const storage = rememberMe ? localStorage : sessionStorage;
+                            storage.setItem('aurafuel_token', data.token);
+                            storage.setItem('aurafuel_currentUser', JSON.stringify(data.user));
+
+                            showToast('✅ Welcome back, ' + data.user.fullName.split(' ')[0] + '!', true);
+
+                            setTimeout(() => {
+                                window.location.href = 'dashboard.html';
+                            }, 1200);
+                        } else {
+                            showToast(data.message || '❌ Invalid credentials', false);
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = '⚡ Log In';
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error:', err);
+                        showToast('❌ Server error. Try again.', false);
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = '⚡ Log In';
+                    });
+            });
+
+            document.getElementById('forgotPassword').addEventListener('click', function() {
+                const credential = activeTab === 'email' ?
+                    emailInput.value.trim() :
+                    mobileInput.value.trim();
+                if (!credential) {
+                    showToast('Enter your email or mobile first', false);
+                } else {
+                    showToast('🔜 Password reset link sent!', true);
+                }
+            });
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && document.activeElement && document.activeElement.closest('.app-shell')) {
+                    e.preventDefault();
+                    submitBtn.click();
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

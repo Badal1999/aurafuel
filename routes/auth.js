@@ -15,10 +15,16 @@ const generateToken = (id) => {
 
 // Nodemailer transporter
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false, // TLS
+    requireTLS: true,
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
+    },
+    tls: {
+        rejectUnauthorized: false // optional, for self‑signed certs
     }
 });
 

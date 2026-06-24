@@ -437,7 +437,7 @@
                 const rememberMe = document.getElementById('rememberMe').checked;
 
                 // ✅ API CALL TO BACKEND
-                fetch('http://localhost:5000/api/auth/login', {
+                fetch('/api/auth/login', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ credential, password })

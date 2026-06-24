@@ -330,14 +330,14 @@
 
     // ─── API helpers ───
     async function fetchMealChecks() {
-        const res = await fetch(`http://localhost:5000/api/tracker/meal/${today}`, {
+        const res = await fetch(`/api/tracker/meal/${today}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await res.json();
         return data.meals || [];
     }
     async function toggleMealAPI(meal) {
-        const res = await fetch('http://localhost:5000/api/tracker/meal', {
+        const res = await fetch('/api/tracker/meal', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ date: today, mealType: meal })
@@ -345,14 +345,14 @@
         return await res.json();
     }
     async function fetchExerciseCheck() {
-        const res = await fetch(`http://localhost:5000/api/tracker/exercise/${today}`, {
+        const res = await fetch(`/api/tracker/exercise/${today}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await res.json();
         return data.checked;
     }
     async function toggleExerciseAPI() {
-        const res = await fetch('http://localhost:5000/api/tracker/exercise', {
+        const res = await fetch('/api/tracker/exercise', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ date: today })
@@ -360,21 +360,21 @@
         return await res.json();
     }
     async function fetchWaterGlasses() {
-        const res = await fetch(`http://localhost:5000/api/tracker/water/today`, {
+        const res = await fetch(`/api/tracker/water/today`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await res.json();
         return data.glasses || 0;
     }
     async function addWaterGlass() {
-        await fetch('http://localhost:5000/api/water', {
+        await fetch('/api/water', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ date: today })
         });
     }
     async function fetchStreak() {
-        const res = await fetch('http://localhost:5000/api/tracker/streak', {
+        const res = await fetch('/api/tracker/streak', {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await res.json();
@@ -385,8 +385,8 @@
     async function checkUserSetup() {
         try {
             const [mealRes, exerciseRes] = await Promise.all([
-                fetch(`http://localhost:5000/api/meals/today`, { headers: { 'Authorization': `Bearer ${token}` } }),
-                fetch(`http://localhost:5000/api/exercise/latest`, { headers: { 'Authorization': `Bearer ${token}` } })
+                fetch(`/api/meals/today`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch(`/api/exercise/latest`, { headers: { 'Authorization': `Bearer ${token}` } })
             ]);
             const mealData = await mealRes.json();
             const exerciseData = await exerciseRes.json();
@@ -421,7 +421,7 @@
     // ─── Meal targets load (actual calories) ───
     async function loadMealTargets() {
         try {
-            const res = await fetch(`http://localhost:5000/api/meals/today`, {
+            const res = await fetch(`/api/meals/today`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();

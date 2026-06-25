@@ -263,7 +263,7 @@
     async function loadWaterIntake() {
         const last7Days = getLastNDays(7);
         const start = last7Days[0], end = last7Days[last7Days.length-1];
-        const res = await fetch(`http://localhost:5000/api/tracker/water/range?start=${start}&end=${end}`, {
+        const res = await fetch(`/api/tracker/water/range?start=${start}&end=${end}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await res.json();

@@ -375,7 +375,7 @@
 
             async function fetchTodayMeals() {
                 try {
-                    const res = await fetch('http://localhost:5000/api/meals/today', {
+                    const res = await fetch('/api/meals/today', {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
                     const data = await res.json();
@@ -389,7 +389,7 @@
 
             async function fetchLatestMeals() {
                 try {
-                    const res = await fetch('http://localhost:5000/api/meals/latest', {
+                    const res = await fetch('/api/meals/latest', {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
                     const data = await res.json();
@@ -526,7 +526,7 @@ cameFromDashboard = false;   // user came from slide 2, not dashboard
 // ─── BACKEND UPDATE START ───
 const token = localStorage.getItem('aurafuel_token') || sessionStorage.getItem('aurafuel_token');
 // Update user profile (age, weight, goal) via PUT /api/auth/me
-fetch('http://localhost:5000/api/auth/me', {
+fetch('/api/auth/me', {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
     body: JSON.stringify({ age: userAge, weight: userWeight, goal: selectedGoal })
@@ -535,7 +535,7 @@ fetch('http://localhost:5000/api/auth/me', {
 .then(data => {
     console.log('✅ Profile updated:', data);
     // Also log weight to weightlogs collection
-    return fetch('http://localhost:5000/api/weight', {
+    return fetch('/api/weight', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ weight: userWeight, date: new Date().toISOString().split('T')[0] })
@@ -792,7 +792,7 @@ updateActionButtons();
                     }
                 };
 
-                fetch('http://localhost:5000/api/meals', {
+                fetch('/api/meals', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -842,7 +842,7 @@ updateActionButtons();
                     if (latestMeals.length > 0) {
                         for (const meal of latestMeals) {
                             try {
-                                await fetch('http://localhost:5000/api/meals', {
+                                await fetch('/api/meals', {
                                     method: 'POST',
                                     headers: {
                                         'Content-Type': 'application/json',

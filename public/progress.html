@@ -182,7 +182,7 @@
 
     // ────────────────── WEIGHT TREND ──────────────────
     async function loadWeightChart() {
-        const res = await fetch('http://localhost:5000/api/weight', {
+        const res = await fetch('/api/weight', {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await res.json();
@@ -241,7 +241,7 @@
     async function loadCalorieIntake() {
         const last7Days = getLastNDays(7);
         const start = last7Days[0], end = last7Days[last7Days.length-1];
-        const res = await fetch(`http://localhost:5000/api/meals/range?start=${start}&end=${end}`, {
+        const res = await fetch(`/api/meals/range?start=${start}&end=${end}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await res.json();
@@ -292,7 +292,7 @@
     async function loadExerciseChart() {
         const last7Days = getLastNDays(7);
         const start = last7Days[0], end = last7Days[last7Days.length-1];
-        const res = await fetch(`http://localhost:5000/api/tracker/exercise/range?start=${start}&end=${end}`, {
+        const res = await fetch(`/api/tracker/exercise/range?start=${start}&end=${end}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await res.json();
@@ -332,7 +332,7 @@
         const start = last30Days[0], end = last30Days[last30Days.length-1];
 
         const [mealRes, exerciseRes] = await Promise.all([
-            fetch(`http://localhost:5000/api/tracker/meal/${end}`), // we need a range route, but we can just get all by fetching streak route which gives dates? Actually we need per-day active status. We'll create a route /api/tracker/active-dates?start=...&end=... that returns array of dates with any activity. But we haven't defined that. For now, we can use the streak route's logic client-side by fetching meal checks and exercise checks separately. We don't have range route for meal checks. Let's improvise: we'll fetch the streak route which already returns the streak count; we need the calendar. We can loop through 30 days and check for each date using the same logic as streak? Too many calls. Better to define a new route /api/tracker/active-dates that returns all dates within range that have either a meal check or exercise check. We'll add that route.
+            fetch(`/api/tracker/meal/${end}`), // we need a range route, but we can just get all by fetching streak route which gives dates? Actually we need per-day active status. We'll create a route /api/tracker/active-dates?start=...&end=... that returns array of dates with any activity. But we haven't defined that. For now, we can use the streak route's logic client-side by fetching meal checks and exercise checks separately. We don't have range route for meal checks. Let's improvise: we'll fetch the streak route which already returns the streak count; we need the calendar. We can loop through 30 days and check for each date using the same logic as streak? Too many calls. Better to define a new route /api/tracker/active-dates that returns all dates within range that have either a meal check or exercise check. We'll add that route.
         ]);
 
         // Temporary: we'll just draw an empty grid for now, and I'll provide the route later.
@@ -348,7 +348,7 @@
     async function loadStreakCalendar() {
         const last30Days = getLastNDays(30);
         const start = last30Days[0], end = last30Days[last30Days.length-1];
-        const res = await fetch(`http://localhost:5000/api/tracker/active-dates?start=${start}&end=${end}`, {
+        const res = await fetch(`/api/tracker/active-dates?start=${start}&end=${end}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await res.json();

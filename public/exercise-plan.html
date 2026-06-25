@@ -315,7 +315,7 @@
         // ─── Fetch latest exercise plan from backend ───
         async function fetchLatestExercisePlan() {
             try {
-                const res = await fetch('http://localhost:5000/api/exercise/latest', {
+                const res = await fetch('/api/exercise/latest', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const data = await res.json();
@@ -433,7 +433,7 @@
             const goalLabels = { weight_loss: 'Fat Loss', muscle_gain: 'Muscle Gain', maintenance: 'Maintenance' };
 
             // Save to backend
-            fetch('http://localhost:5000/api/exercise', {
+            fetch('/api/exercise', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

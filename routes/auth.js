@@ -55,13 +55,64 @@ router.post('/send-otp', async (req, res) => {
         await Otp.create({ email, otp });
 
         const html = `
-            <div style="font-family: Arial, sans-serif; max-width: 400px; margin: 0 auto; padding: 20px; border: 1px solid #e5e5e5; border-radius: 10px;">
-                <h2 style="color: #000;">⚡ auraFuel</h2>
-                <p>Your One‑Time Password (OTP) for registration is:</p>
-                <h1 style="letter-spacing: 5px; color: #000;">${otp}</h1>
-                <p style="color: #888; font-size: 12px;">This OTP is valid for 5 minutes.</p>
-            </div>
-        `;
+             <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin:0; padding:0; background-color:#f5f5f5; font-family: 'Segoe UI', Arial, sans-serif;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width:440px; margin:30px auto; background:#ffffff; border-radius:20px; overflow:hidden; box-shadow:0 8px 24px rgba(0,0,0,0.06);">
+            
+            <!-- Header -->
+            <tr>
+                <td style="background:linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); padding:30px 28px; text-align:center;">
+                    <h1 style="color:#ffffff; font-size:26px; font-weight:700; margin:0; letter-spacing:-0.5px;">⚡ auraFuel</h1>
+                    <p style="color:#b0b0b0; font-size:13px; margin:8px 0 0; font-weight:500;">IGNITE YOUR FITNESS JOURNEY</p>
+                </td>
+            </tr>
+            
+            <!-- Body -->
+            <tr>
+                <td style="padding:32px 28px;">
+                    <h2 style="color:#1a1a1a; font-size:18px; font-weight:700; margin:0 0 8px;">Hey there! 👋</h2>
+                    <p style="color:#555; font-size:14px; line-height:1.6; margin:0 0 6px;">You're just one step away from transforming your body and mind. Use the OTP below to verify your email and start your journey with <strong>auraFuel</strong>.</p>
+                    
+                    <!-- Motivational Quote -->
+                    <table width="100%" cellpadding="12" style="background:#fafafa; border-left:4px solid #1a1a1a; border-radius:8px; margin:20px 0;">
+                        <tr>
+                            <td style="font-size:13px; color:#555; font-style:italic;">
+                                ✨ <em>"The only bad workout is the one that didn't happen."</em>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                    <!-- OTP Box -->
+                    <table width="100%" cellpadding="16" style="background:#1a1a1a; border-radius:14px; margin:20px 0; text-align:center;">
+                        <tr>
+                            <td>
+                                <p style="color:#8c8c8c; font-size:11px; text-transform:uppercase; letter-spacing:1.5px; margin:0 0 6px;">Your One‑Time Password</p>
+                                <h2 style="color:#ffffff; font-size:32px; font-weight:700; letter-spacing:6px; margin:0;">${otp}</h2>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                    <p style="color:#888; font-size:11px; text-align:center; margin:0;">This OTP expires in <strong>5 minutes</strong>. If you didn't request this, please ignore this email.</p>
+                </td>
+            </tr>
+            
+            <!-- Footer -->
+            <tr>
+                <td style="background:#fafafa; padding:20px 28px; text-align:center; border-top:1px solid #e5e5e5;">
+                    <p style="color:#b0b0b0; font-size:11px; margin:0;">© 2026 auraFuel. All rights reserved.</p>
+                    <p style="color:#b0b0b0; font-size:11px; margin:4px 0 0;">Fuel your aura. Fuel your life.</p>
+                </td>
+            </tr>
+            
+        </table>
+    </body>
+    </html>
+    `;
 
         await sendEmail(email, 'Your OTP for auraFuel Registration', html);
         res.json({ message: 'OTP sent successfully' });

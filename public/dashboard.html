@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>⚡ auraFuel · Dashboard</title>
-    <link rel="manifest" href="/manifest.json">
     <style>
         :root {
             --bg: #ffffff;
@@ -33,13 +32,13 @@
             color: var(--text-primary);
             display: flex; justify-content: center; align-items: center;
             min-height: 100vh; padding: 16px;
-            -webkit-font-smoothing: antialiased;
         }
         .app-shell {
             width: 100%; max-width: 420px; height: 720px;
             background: var(--bg); border-radius: var(--radius-xl);
             overflow: hidden; box-shadow: var(--shadow-lg);
-            border: 1px solid var(--border); display: flex; flex-direction: column; position: relative;
+            border: 1px solid var(--border); display: flex; flex-direction: column;
+            position: relative;
         }
         .header {
             display: flex; justify-content: space-between; align-items: center;
@@ -241,7 +240,7 @@
             </div>
             <div class="mini-card" id="weightMiniCard">
                 <div class="mini-card-icon">⚖️</div>
-                <div class="mini-card-value" id="weightValue">—</div>
+                <div class="mini-card-value" id="weightValue">75</div>
                 <div class="mini-card-label">Weight (kg)</div>
             </div>
             <div class="mini-card" id="streakMiniCard">
@@ -305,25 +304,17 @@
 
     const mealNames = ['breakfast', 'lunch', 'pre_workout', 'post_workout', 'dinner'];
     const mealIcons = { breakfast: '🌅', lunch: '🌇', pre_workout: '⚡', post_workout: '🔄', dinner: '🌙' };
-    const mealWindows = {
-        breakfast: { start: 7, end: 9, name: 'Breakfast' },
-        lunch: { start: 12, end: 14, name: 'Lunch' },
-        pre_workout: { start: 15, end: 17, name: 'Pre-Workout' },
-        post_workout: { start: 17, end: 19, name: 'Post-Workout' },
-        dinner: { start: 19, end: 21, name: 'Dinner' }
-    };
-    const motivationalMessages = {
-        checked: ['✅ Great job! You\'re on track! 💪', '🌟 Awesome! Every meal brings you closer!'],
-        missed: ['⚠️ You missed %meal%. Don\'t let it happen again!', '😟 %meal% skipped. Stay focused!'],
-        reminder: ['⏰ Time for %meal%!', '🔔 %meal% time!'],
-        allDone: ['🎉 All meals done! You\'re a rockstar! 🚀'],
-        exerciseDone: ['🏋️ Workout crushed! Your aura is glowing! ✨']
-    };
+    const mealPercent = { breakfast: 0.25, lunch: 0.35, pre_workout: 0.05, post_workout: 0.10, dinner: 0.25 };
 
     let mealTargets = {};
     mealNames.forEach(m => mealTargets[m] = 0);
     let dailyTarget = 0;
     let trackerEnabled = false;
+
+    // 🆕 Caching variables (optimistic UI)
+    let cachedMealChecks = [];      // array of mealType strings
+    let cachedExerciseChecked = false;
+
     let reminderInterval = null;
     let waterReminderInterval = null;
     let lastReminderSent = {};
@@ -337,6 +328,7 @@
         const data = await res.json();
         return data.meals || [];
     }
+
     async function toggleMealAPI(meal) {
         const res = await fetch('/api/tracker/meal', {
             method: 'POST',
@@ -345,6 +337,7 @@
         });
         return await res.json();
     }
+
     async function fetchExerciseCheck() {
         const res = await fetch(`/api/tracker/exercise/${today}`, {
             headers: { 'Authorization': `Bearer ${token}` }
@@ -352,6 +345,7 @@
         const data = await res.json();
         return data.checked;
     }
+
     async function toggleExerciseAPI() {
         const res = await fetch('/api/tracker/exercise', {
             method: 'POST',
@@ -360,6 +354,7 @@
         });
         return await res.json();
     }
+
     async function fetchWaterGlasses() {
         const res = await fetch(`/api/tracker/water/today`, {
             headers: { 'Authorization': `Bearer ${token}` }
@@ -367,6 +362,7 @@
         const data = await res.json();
         return data.glasses || 0;
     }
+
     async function addWaterGlass() {
         await fetch('/api/water', {
             method: 'POST',
@@ -374,6 +370,7 @@
             body: JSON.stringify({ date: today })
         });
     }
+
     async function fetchStreak() {
         const res = await fetch('/api/tracker/streak', {
             headers: { 'Authorization': `Bearer ${token}` }
@@ -382,26 +379,34 @@
         return data.streak || 0;
     }
 
-    // ─── Setup check ───
+    // ─── Setup check (use latest plan) ───
     async function checkUserSetup() {
         try {
             const [mealRes, exerciseRes] = await Promise.all([
-                fetch(`/api/meals/today`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch(`/api/meals/latest`, { headers: { 'Authorization': `Bearer ${token}` } }),
                 fetch(`/api/exercise/latest`, { headers: { 'Authorization': `Bearer ${token}` } })
             ]);
+
             const mealData = await mealRes.json();
             const exerciseData = await exerciseRes.json();
-            const meals = mealData.meals || [];
-            const hasMeals = meals.length === 5;
+
+            const latestMeals = mealData.meals || [];
+            const hasMeals = latestMeals.length === 5;
             const hasExercise = exerciseData.exercise ? true : false;
+
             trackerEnabled = hasMeals && hasExercise;
+
             if (!trackerEnabled) {
                 showSetupBanner();
             } else {
                 setupBanner.style.display = 'none';
                 enableChecklist();
             }
-        } catch (err) { console.error(err); trackerEnabled = false; showSetupBanner(); }
+        } catch (err) {
+            console.error('Setup check failed:', err);
+            trackerEnabled = false;
+            showSetupBanner();
+        }
     }
 
     function showSetupBanner() {
@@ -419,15 +424,15 @@
         document.querySelectorAll('#mealChecklist .checklist-item, #exerciseCheck').forEach(el => el.classList.remove('disabled'));
     }
 
-    // ─── Meal targets load (actual calories) ───
+    // ─── Load meal targets (actual calories) ───
     async function loadMealTargets() {
         try {
-            const res = await fetch(`/api/meals/today`, {
+            const res = await fetch(`/api/meals/latest`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
-            const todayMeals = data.meals || [];
-            todayMeals.forEach(meal => {
+            const meals = data.meals || [];
+            meals.forEach(meal => {
                 if (mealTargets.hasOwnProperty(meal.mealType)) {
                     mealTargets[meal.mealType] = meal.totalCalories || 0;
                 }
@@ -446,10 +451,10 @@
         goalCalSpan.textContent = dailyTarget.toLocaleString();
     }
 
-    // ─── UI updates ───
+    // ─── UI Updates (with cache) ───
     async function updateProgress() {
         if (!trackerEnabled) return;
-        const meals = await fetchMealChecks();
+        const meals = cachedMealChecks;
         let consumed = 0;
         meals.forEach(meal => { consumed += (mealTargets[meal] || 0); });
         const percent = dailyTarget > 0 ? Math.min(Math.round((consumed / dailyTarget)*100), 100) : 0;
@@ -461,7 +466,7 @@
     }
 
     async function renderChecklist() {
-        const meals = trackerEnabled ? await fetchMealChecks() : [];
+        const meals = trackerEnabled ? cachedMealChecks : [];
         mealChecklist.innerHTML = '';
         mealNames.forEach(meal => {
             const isChecked = meals.includes(meal);
@@ -484,9 +489,8 @@
             mealChecklist.appendChild(div);
         });
 
-        const exChecked = trackerEnabled ? await fetchExerciseCheck() : false;
-        exerciseCheck.classList.toggle('checked', exChecked);
-        exerciseCheckBox.textContent = exChecked ? '✓' : '';
+        exerciseCheck.classList.toggle('checked', cachedExerciseChecked);
+        exerciseCheckBox.textContent = cachedExerciseChecked ? '✓' : '';
         if (!trackerEnabled) {
             exerciseCheck.classList.add('disabled');
         } else {
@@ -496,42 +500,46 @@
 
     async function toggleMeal(meal) {
         if (!trackerEnabled) return;
-        const result = await toggleMealAPI(meal);
-        if (result.checked) {
-            const msg = motivationalMessages.checked[Math.floor(Math.random() * motivationalMessages.checked.length)];
-            showToast(msg, 'success');
-            if ('Notification' in window && Notification.permission === 'granted') {
-                try { new Notification('✅ Meal Complete!', { body: msg, icon: '⚡' }); } catch(e) {}
-            }
-        } else {
-            showToast(`ℹ️ ${meal.replace('_', ' ')} unchecked`, 'warning');
-        }
+
+        // Optimistic update
+        const idx = cachedMealChecks.indexOf(meal);
+        if (idx > -1) cachedMealChecks.splice(idx, 1);
+        else cachedMealChecks.push(meal);
+
+        // Instant UI refresh
         await renderChecklist();
         await updateProgress();
         await checkAllDone();
+
+        // Background sync (non-blocking)
+        toggleMealAPI(meal)
+            .then(result => {
+                if (result.checked !== (idx === -1)) {
+                    // Rare mismatch: re-sync
+                    fetchMealChecks().then(serverChecks => {
+                        cachedMealChecks = serverChecks;
+                        renderChecklist();
+                        updateProgress();
+                    });
+                }
+            })
+            .catch(err => console.error('Meal toggle sync failed:', err));
     }
 
     exerciseCheck.addEventListener('click', async () => {
         if (!trackerEnabled) return;
-        const result = await toggleExerciseAPI();
-        const exChecked = result.checked;
-        exerciseCheck.classList.toggle('checked', exChecked);
-        exerciseCheckBox.textContent = exChecked ? '✓' : '';
-        if (exChecked) {
-            const msg = motivationalMessages.exerciseDone[Math.floor(Math.random() * motivationalMessages.exerciseDone.length)];
-            showToast(msg, 'success');
-            if ('Notification' in window && Notification.permission === 'granted') {
-                try { new Notification('🏋️ Exercise Done!', { body: msg, icon: '⚡' }); } catch(e) {}
-            }
-        }
+        cachedExerciseChecked = !cachedExerciseChecked;
+        exerciseCheck.classList.toggle('checked', cachedExerciseChecked);
+        exerciseCheckBox.textContent = cachedExerciseChecked ? '✓' : '';
         await checkAllDone();
+        toggleExerciseAPI().catch(err => console.error('Exercise toggle sync failed:', err));
     });
 
     async function checkAllDone() {
-        const meals = await fetchMealChecks();
-        const exChecked = await fetchExerciseCheck();
+        const meals = cachedMealChecks;
+        const exChecked = cachedExerciseChecked;
         if (meals.length === mealNames.length && exChecked) {
-            const msg = motivationalMessages.allDone[Math.floor(Math.random() * motivationalMessages.allDone.length)];
+            const msg = '🎉 All meals done! You\'re a rockstar! 🚀';
             showToast(msg, 'success');
             if ('Notification' in window && Notification.permission === 'granted') {
                 try { new Notification('🎉 Mission Complete!', { body: msg, icon: '⚡' }); } catch(e) {}
@@ -544,7 +552,6 @@
         const glasses = await fetchWaterGlasses();
         waterCount.textContent = glasses;
     }
-
     document.getElementById('waterMiniCard').addEventListener('click', async () => {
         await addWaterGlass();
         await updateWater();
@@ -593,17 +600,24 @@
         return null;
     }
 
+    const mealWindows = {
+        breakfast: { start: 7, end: 9, name: 'Breakfast' },
+        lunch: { start: 12, end: 14, name: 'Lunch' },
+        pre_workout: { start: 15, end: 17, name: 'Pre-Workout' },
+        post_workout: { start: 17, end: 19, name: 'Post-Workout' },
+        dinner: { start: 19, end: 21, name: 'Dinner' }
+    };
+
     async function runReminderCheck() {
         const currentMeal = getCurrentMealWindow();
-        const checked = trackerEnabled ? await fetchMealChecks() : [];
+        const checked = trackerEnabled ? cachedMealChecks : [];
         const nowHour = new Date().getHours();
 
         if (currentMeal && !checked.includes(currentMeal)) {
             const now = Date.now();
             if (now - (lastReminderSent[currentMeal] || 0) >= 540000) {
                 lastReminderSent[currentMeal] = now;
-                const msg = motivationalMessages.reminder[Math.floor(Math.random() * motivationalMessages.reminder.length)]
-                    .replace('%meal%', mealWindows[currentMeal].name);
+                const msg = `⏰ Time for ${mealWindows[currentMeal].name}!`;
                 showToast(msg, 'warning');
                 if ('Notification' in window && Notification.permission === 'granted') {
                     try { new Notification('⏰ Meal Reminder', { body: msg, icon: '⚡' }); } catch(e) {}
@@ -617,17 +631,14 @@
                 const now = Date.now();
                 if (now - (lastReminderSent[meal] || 0) >= 540000) {
                     lastReminderSent[meal] = now;
-                    const msg = motivationalMessages.missed[Math.floor(Math.random() * motivationalMessages.missed.length)]
-                        .replace('%meal%', win.name);
+                    const msg = `⚠️ You missed ${win.name}.`;
                     showToast(msg, 'error');
                     if ('Notification' in window && Notification.permission === 'granted') {
                         try { new Notification('❌ Meal Missed', { body: msg, icon: '⚡' }); } catch(e) {}
                     }
                     const nextMeal = getNextUpcomingMeal();
                     if (nextMeal) {
-                        setTimeout(() => {
-                            showToast(`🔔 Don't miss ${mealWindows[nextMeal].name}!`, 'warning');
-                        }, 2000);
+                        setTimeout(() => showToast(`🔔 Don't miss ${mealWindows[nextMeal].name}!`, 'warning'), 2000);
                     }
                 }
             }
@@ -644,7 +655,7 @@
         const glasses = await fetchWaterGlasses();
         if (glasses < 8) {
             const remaining = 8 - glasses;
-            const msg = `💧 Time to drink water! You've had ${glasses}/8 glasses. ${remaining} more to go.`;
+            const msg = `💧 Time to drink water! ${glasses}/8 glasses. ${remaining} more.`;
             showToast(msg, 'warning');
             if ('Notification' in window && Notification.permission === 'granted') {
                 try { new Notification('💧 Stay Hydrated!', { body: msg, icon: '⚡' }); } catch(e) {}
@@ -699,11 +710,17 @@
     (async () => {
         await loadMealTargets();
         await checkUserSetup();
+
+        // Cache populate from server
+        cachedMealChecks = await fetchMealChecks();
+        cachedExerciseChecked = await fetchExerciseCheck();
+
         await renderChecklist();
         await updateProgress();
         await updateWater();
         updateWeight();
         await updateStreak();
+
         startMealReminderSystem();
         startWaterReminder();
     })();
